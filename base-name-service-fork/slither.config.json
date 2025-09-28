@@ -1,0 +1,20 @@
+{
+  "filter_paths": "node_modules|test|mocks",
+  "exclude_low": true,
+  "exclude_medium": false,
+  "exclude_high": false,
+  "exclude_optimization": true,
+  "exclude_informational": true,
+  "detectors_to_exclude": "naming-convention,external-function,unused-return,solc-version",
+  "fail_on": "medium,high",
+  "compile_force_framework": "hardhat",
+  "checklist": true,
+  "markdown": "slither-report.md",
+  "json": "slither-report.json",
+  "sarif": "slither-report.sarif",
+  "print_to_console": true,
+  "disable_color": false,
+  "hardhat_cache_directory": "./cache",
+  "hardhat_artifacts_directory": "./artifacts",
+  "show_ignored_findings": false
+}

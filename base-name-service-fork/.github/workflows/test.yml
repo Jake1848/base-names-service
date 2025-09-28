@@ -1,0 +1,143 @@
+name: Test & Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Cache Hardhat compilation
+      uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+      with:
+        path: |
+          cache
+          artifacts
+        key: ${{ runner.os }}-hardhat-${{ hashFiles('**/contracts/**/*.sol') }}
+        restore-keys: |
+          ${{ runner.os }}-hardhat-
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Compile contracts
+      run: npm run compile
+
+    - name: Run tests
+      run: npm test
+      env:
+        REPORT_GAS: true
+
+    - name: Run coverage
+      if: matrix.node-version == '20.x'
+      run: npm run coverage
+
+    - name: Upload coverage to Codecov
+      if: matrix.node-version == '20.x'
+      uses: codecov/codecov-action@e0b68c6749509c5f83f984dd99a76a1c1b231044 # v4.0.1
+      with:
+        file: ./coverage.json
+        fail_ci_if_error: false
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Use Node.js
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run Solhint
+      run: npm run lint:sol
+
+    - name: Run ESLint
+      run: npm run lint:js
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Use Node.js
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run Slither
+      uses: crytic/slither-action@41aa79d6757e16e9311a8190ae0d7375c54d2a48 # v0.4.0
+      continue-on-error: false
+      with:
+        node-version: '20.x'
+        slither-config: 'slither.config.json'
+        fail-on: 'medium'
+
+    - name: Upload Slither report
+      if: always()
+      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      with:
+        name: slither-report
+        path: |
+          slither-report.md
+          slither-report.json
+          slither-report.sarif
+
+  gas-report:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+    - name: Use Node.js
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Cache Hardhat compilation
+      uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+      with:
+        path: |
+          cache
+          artifacts
+        key: ${{ runner.os }}-hardhat-${{ hashFiles('**/contracts/**/*.sol') }}
+        restore-keys: |
+          ${{ runner.os }}-hardhat-
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate gas report
+      run: npm run test:gas
+
+    - name: Upload gas report
+      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      with:
+        name: gas-report
+        path: gasReport.txt

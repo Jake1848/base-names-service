@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to deploy to'
+        required: true
+        default: 'base-sepolia'
+        type: choice
+        options:
+          - base-sepolia
+          - base-mainnet
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.network }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Compile contracts
+      run: npm run compile
+
+    - name: Run tests
+      run: npm test
+
+    - name: Deploy to ${{ github.event.inputs.network }}
+      env:
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+        BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+        BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+      run: |
+        if [ "${{ github.event.inputs.network }}" == "base-mainnet" ]; then
+          npm run deploy:mainnet
+        else
+          npm run deploy:testnet
+        fi
+
+    - name: Upload deployment info
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-${{ github.event.inputs.network }}
+        path: deployment-*.json
+
+    - name: Verify contracts
+      if: success()
+      env:
+        BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+      run: |
+        echo "Contracts deployed successfully to ${{ github.event.inputs.network }}"
+        echo "Run verification manually if needed"

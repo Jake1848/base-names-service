@@ -1,0 +1,151 @@
+{
+  "network": "mainnet",
+  "chainId": 1,
+  "deployedAt": "2024-01-15T10:30:00.000Z",
+  "deployer": "0x...",
+  "multisig": "0x...",
+  "version": "1.0.0",
+  "contracts": {
+    "ENSRegistry": {
+      "address": "0x...",
+      "blockNumber": 18000000,
+      "transactionHash": "0x...",
+      "deploymentGas": 1234567,
+      "verified": true
+    },
+    "BaseRegistrarImplementation": {
+      "address": "0x...",
+      "blockNumber": 18000001,
+      "transactionHash": "0x...",
+      "deploymentGas": 2345678,
+      "verified": true
+    },
+    "ETHRegistrarController": {
+      "address": "0x...",
+      "blockNumber": 18000002,
+      "transactionHash": "0x...",
+      "deploymentGas": 3456789,
+      "verified": true
+    },
+    "PublicResolver": {
+      "address": "0x...",
+      "blockNumber": 18000003,
+      "transactionHash": "0x...",
+      "deploymentGas": 2234567,
+      "verified": true
+    },
+    "ReverseRegistrar": {
+      "address": "0x...",
+      "blockNumber": 18000004,
+      "transactionHash": "0x...",
+      "deploymentGas": 1345678,
+      "verified": true
+    },
+    "DefaultReverseRegistrar": {
+      "address": "0x...",
+      "blockNumber": 18000005,
+      "transactionHash": "0x...",
+      "deploymentGas": 1345678,
+      "verified": true
+    },
+    "BasePriceOracle": {
+      "address": "0x...",
+      "blockNumber": 18000006,
+      "transactionHash": "0x...",
+      "deploymentGas": 1123456,
+      "verified": true
+    },
+    "RegistrationLimiter": {
+      "address": "0x...",
+      "blockNumber": 18000007,
+      "transactionHash": "0x...",
+      "deploymentGas": 987654,
+      "verified": true
+    },
+    "FeeManager": {
+      "address": "0x...",
+      "blockNumber": 18000008,
+      "transactionHash": "0x...",
+      "deploymentGas": 1456789,
+      "verified": true
+    }
+  },
+  "configuration": {
+    "minCommitmentAge": 60,
+    "maxCommitmentAge": 2592000,
+    "minRegistrationDuration": 2419200,
+    "referrerFeePercentage": 500,
+    "maxRegistrationsPerWindow": 10,
+    "registrationTimeWindow": 3600,
+    "withdrawalDelay": 86400,
+    "maxWithdrawal": "100000000000000000000",
+    "emergencyWithdrawalLimit": "10000000000000000000"
+  },
+  "verification": {
+    "passed": 25,
+    "failed": 0,
+    "warnings": 2,
+    "timestamp": "2024-01-15T10:45:00.000Z",
+    "checks": [
+      "Contract deployments verified",
+      "ENS .base node ownership correct",
+      "Controller authorization confirmed",
+      "Rate limiter properly configured",
+      "Fee manager timelock working",
+      "Withdrawal circuit breaker functional",
+      "Label validation enforced",
+      "Commitment age bounds correct",
+      "Emergency pause functional",
+      "Ownership transferred to multisig"
+    ]
+  },
+  "abis": {
+    "ENSRegistry": "./abis/ENSRegistry.json",
+    "BaseRegistrarImplementation": "./abis/BaseRegistrarImplementation.json",
+    "ETHRegistrarController": "./abis/ETHRegistrarController.json",
+    "PublicResolver": "./abis/PublicResolver.json",
+    "ReverseRegistrar": "./abis/ReverseRegistrar.json",
+    "DefaultReverseRegistrar": "./abis/DefaultReverseRegistrar.json",
+    "BasePriceOracle": "./abis/BasePriceOracle.json",
+    "RegistrationLimiter": "./abis/RegistrationLimiter.json",
+    "FeeManager": "./abis/FeeManager.json"
+  },
+  "interfaces": {
+    "ENS": "0x01ffc9a7",
+    "BaseRegistrar": "0x6ccb2df4",
+    "ETHRegistrarController": "0x018fac06",
+    "Resolver": "0x3b3b57de",
+    "ReverseRegistrar": "0xa8fa5682"
+  },
+  "urls": {
+    "etherscan": "https://etherscan.io",
+    "documentation": "https://docs.basename.app",
+    "github": "https://github.com/base-org/base-name-service",
+    "website": "https://basename.app"
+  },
+  "security": {
+    "audits": [
+      {
+        "auditor": "Trail of Bits",
+        "date": "2024-01-10",
+        "report": "https://...",
+        "status": "completed",
+        "findings": 0
+      }
+    ],
+    "bugBounty": {
+      "program": "active",
+      "url": "https://immunefi.com/bounty/basename",
+      "maxReward": "$50,000"
+    },
+    "emergencyContacts": [
+      "security@basename.app",
+      "+1-XXX-XXX-XXXX"
+    ]
+  },
+  "integrations": {
+    "subgraph": "https://api.thegraph.com/subgraphs/name/basename/base-names",
+    "ipfs": "https://gateway.pinata.cloud/ipfs/",
+    "monitoring": "https://basename.grafana.net"
+  }
+}

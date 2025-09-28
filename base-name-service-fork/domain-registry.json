@@ -1,0 +1,63 @@
+{
+  "network": "base-sepolia",
+  "timestamp": "2025-09-28T18:26:09.925Z",
+  "deployer": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+  "total_processed": 9,
+  "newly_registered": 9,
+  "domains": [
+    {
+      "name": "alice",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0x1c59360d9147974e55661a6c9b97b7497b565b4a6a13e6bb621bf117d7786d94"
+    },
+    {
+      "name": "bob",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0xac64672c2b8079525306c544eebfb7fd6c4c70769c3fe98429a0373638122bee"
+    },
+    {
+      "name": "charlie",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0x17b9a106a9f518b36f343b6ad096340a870fc7055cb72570f6f90ce4a33679c7"
+    },
+    {
+      "name": "david",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0x8e6cdca49fc356c35bb4fdd29ec566db1c9870b3f96794376d58f128e2e2a5a4"
+    },
+    {
+      "name": "eve",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0xe4a4dc5e8b6ca941dc277e04bd20ab3cccccae2557929999b13d92153f4279c9"
+    },
+    {
+      "name": "crypto",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0xfa86771d46067069e74a46167aaa046d1d68e21a09af4a474c28230d31d32d2f"
+    },
+    {
+      "name": "defi",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0x5eaafeeac7b7194969c260b978bd22b0fed1d3108033b5ec9f5f3159265d4562"
+    },
+    {
+      "name": "nft",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0xd2898b25ed9e72d9b07dceec3fb31286514ffd0a69d11089c45ab8aee7ee107b"
+    },
+    {
+      "name": "web3",
+      "owner": "0x5a66231663D22d7eEEe6e2A4781050076E8a3876",
+      "status": "newly-registered",
+      "txHash": "0xaf90fb4a388ad4ae1fcd0fe78dada3029c0e254880a32c5a454d5ea3b872ce87"
+    }
+  ]
+}

@@ -51,18 +51,18 @@ export const ABIS = {
   ]
 };
 
-// Known registered domains
-export const REGISTERED_DOMAINS = [
-  "testdomain",
-  "alice",
-  "bob",
-  "charlie",
-  "david",
-  "eve",
-  "crypto",
+// Premium domains available for registration
+export const PREMIUM_DOMAINS = [
+  "eth",
+  "coinbase",
+  "base",
+  "web3",
   "defi",
   "nft",
-  "web3"
+  "crypto",
+  "blockchain",
+  "bitcoin",
+  "ethereum"
 ];
 
 // Utility functions

@@ -5,7 +5,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { CONTRACTS, ABIS, REGISTERED_DOMAINS, labelHash } from '@/lib/contracts';
+import { CONTRACTS, ABIS, PREMIUM_DOMAINS, labelHash } from '@/lib/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -58,7 +58,7 @@ function PremiumDomainCard({ domain }: { domain: string }) {
       <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
+            <CardTitle className="text-lg font-bold text-primary group-hover:text-primary/80 transition-colors">
               {domain}.base
             </CardTitle>
             <Badge variant={isAvailable ? "success" : "info"}>
@@ -215,7 +215,7 @@ function DomainSearchSection() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
                   placeholder="Enter domain name"
-                  className="w-full pl-10 pr-16 py-4 text-lg border-2 border-border rounded-lg focus:border-primary focus:outline-none transition-colors bg-background"
+                  className="w-full pl-10 pr-16 py-4 text-lg border-2 border-border rounded-lg focus:border-primary focus:outline-none transition-colors bg-background text-foreground placeholder:text-muted-foreground"
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
                 <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground font-medium">
@@ -248,7 +248,7 @@ function DomainSearchSection() {
                   <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                     <div className="flex items-center justify-center mb-4">
                       <Check className="h-6 w-6 text-green-600 mr-2" />
-                      <span className="text-lg font-semibold text-green-800">
+                      <span className="text-lg font-semibold text-green-700 dark:text-green-400">
                         {searchTerm}.base is available!
                       </span>
                     </div>
@@ -280,10 +280,10 @@ function DomainSearchSection() {
                   </div>
                 ) : (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                    <span className="text-lg font-semibold text-red-800">
+                    <span className="text-lg font-semibold text-red-700 dark:text-red-400">
                       ❌ {searchTerm}.base is already registered
                     </span>
-                    <p className="text-red-600 mt-2">Try a different name or check our marketplace</p>
+                    <p className="text-red-600 dark:text-red-400 mt-2">Try a different name or check our marketplace</p>
                   </div>
                 )}
               </motion.div>
@@ -297,10 +297,10 @@ function DomainSearchSection() {
 
 function StatsSection() {
   const stats = [
-    { icon: Users, label: 'Registered Domains', value: REGISTERED_DOMAINS.length.toString(), color: 'text-blue-600' },
-    { icon: Zap, label: 'Base Sepolia Chain', value: '84532', color: 'text-green-600' },
-    { icon: TrendingUp, label: 'Registration Price', value: '0.05 ETH', color: 'text-purple-600' },
-    { icon: Globe, label: 'Network Status', value: 'Live', color: 'text-orange-600' }
+    { icon: Users, label: 'Available Premium Domains', value: PREMIUM_DOMAINS.length.toString(), color: 'text-primary' },
+    { icon: Zap, label: 'Base Mainnet Chain', value: '8453', color: 'text-primary' },
+    { icon: TrendingUp, label: 'Registration Price', value: '0.05 ETH', color: 'text-primary' },
+    { icon: Globe, label: 'Network Status', value: 'Live', color: 'text-primary' }
   ];
 
   return (
@@ -318,7 +318,7 @@ function StatsSection() {
               <div className={cn("text-3xl font-bold mb-1", stat.color)}>
                 {stat.value}
               </div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
+              <div className="text-sm text-muted-foreground">{stat.label}</div>
             </CardContent>
           </Card>
         </motion.div>
@@ -357,7 +357,7 @@ function FeaturesSection() {
         >
           <Card className="text-center h-full hover:shadow-lg transition-shadow">
             <CardContent className="pt-8 pb-8">
-              <feature.icon className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+              <feature.icon className="h-12 w-12 mx-auto mb-4 text-primary" />
               <CardTitle className="mb-3">{feature.title}</CardTitle>
               <CardDescription>{feature.description}</CardDescription>
             </CardContent>
@@ -426,14 +426,14 @@ export default function Home() {
           <FeaturesSection />
         </section>
 
-        {/* Live Domains Section */}
+        {/* Premium Domains Section */}
         <section className="py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Live .base Domains</h2>
-            <p className="text-xl text-muted-foreground">See domains already registered on our platform</p>
+            <h2 className="text-3xl font-bold mb-4">Premium .base Domains</h2>
+            <p className="text-xl text-muted-foreground">Get these valuable domains before anyone else</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {REGISTERED_DOMAINS.map((domain, index) => (
+            {PREMIUM_DOMAINS.map((domain, index) => (
               <motion.div
                 key={domain}
                 initial={{ opacity: 0, y: 20 }}

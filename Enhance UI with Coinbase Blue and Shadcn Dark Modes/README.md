@@ -1,19 +1,18 @@
-# Base Names - Decentralized Domain Service
+# Base Names - Decentralized Domain Service on Base L2
 
-![Base Names](https://img.shields.io/badge/Base%20Names-LIVE%20ON%20MAINNET-brightgreen)
-![Base L2](https://img.shields.io/badge/Base%20Mainnet-DEPLOYED-blue)
-![Web3](https://img.shields.io/badge/Production-Ready-purple)
+![Base Names](https://img.shields.io/badge/Base%20Names-Production%20Ready-green)
+![Base L2](https://img.shields.io/badge/Base%20L2-Compatible-blue)
+![Web3](https://img.shields.io/badge/Web3-Frontend-purple)
 
-> **🌐 LIVE at [basenameservice.xyz](https://basenameservice.xyz) - Register your .base domain now!**
+> **Production-ready decentralized domain name service for Base Layer 2, featuring .base domains with ENS compatibility.**
 
-## 🔥 **PRODUCTION STATUS**
+## 🚀 **LIVE SYSTEM STATUS**
 
-- 🚀 **LIVE ON BASE MAINNET** - All smart contracts operational
-- 🌐 **basenameservice.xyz** - Production website live
-- ✅ **Real .base domains** available for registration (0.05 ETH/year)
-- 🎨 **Enhanced UI** with Coinbase Blue theme & dark mode
-- 🥇 **First-to-market** .base TLD on Base Layer 2
-- ⚡ **Lightning fast** registrations on Base L2
+- ✅ **10 Live Domains** registered on Base Sepolia
+- ✅ **Smart Contracts** deployed and verified
+- ✅ **Web3 Frontend** with premium UI/UX
+- ✅ **Analytics Dashboard** with key metrics
+- ✅ **Marketplace** with investment insights
 
 ## 🌐 **Quick Start**
 
@@ -54,32 +53,31 @@ base-names/
 
 ## 🏗️ **Architecture**
 
-### Smart Contracts (Base Mainnet) 🔥
-- **ENSRegistry**: `0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E`
-- **BaseRegistrar**: `0xD158de26c787ABD1E0f2955C442fea9d4DC0a917`
-- **BaseController**: `0xca7FD90f4C76FbCdbdBB3427804374b16058F55e`
-- **PublicResolver**: `0x5D5bC53bDa5105561371FEf50B50E03aA94c962E`
-- **BasePriceOracle**: `0xA1805458A1C1294D53eBBBd025B397F89Dd963AC`
-
-*All contracts verified and operational on Base Mainnet (Chain ID: 8453)*
+### Smart Contracts (Base Sepolia)
+- **ENSRegistry**: `0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00`
+- **BaseRegistrar**: `0xB364eb42E361b923244eC9ad6A0bc57fAfDaB15b`
+- **PublicResolver**: `0x6C421ca8356886E5634B267A340102c597c2a352`
+- **BasePriceOracle**: `0x83eF9752EE4f706Ce1f6aa3D32fA1f9f07c2baEb`
+- **SubdomainManager**: `0x8c8433998F9c980524BC46118c73c6Db63e244F8`
 
 ### Frontend Stack
 - **Next.js 14** with App Router and TypeScript
 - **Wagmi + Viem** for Web3 interactions
 - **RainbowKit** for wallet connections
-- **Enhanced UI** with Coinbase Blue theme
-- **Dark/Light mode** toggle with next-themes
-- **Framer Motion** animations and effects
-- **TailwindCSS** + Radix UI + ShadCN styling
+- **Framer Motion** for animations
+- **TailwindCSS** + Radix UI for styling
 
-## 🌟 **How to Register Your .base Domain**
+## 🏷️ **Live Domains Portfolio**
 
-### Step 1: Visit [basenameservice.xyz](https://basenameservice.xyz)
-### Step 2: Connect your Web3 wallet
-### Step 3: Search for available domains
-### Step 4: Register for 0.05 ETH per year
-
-**Premium domains available**: eth.base, coinbase.base, base.base, web3.base, nft.base, defi.base, crypto.base
+| Domain | Status | Owner | Expires |
+|--------|--------|-------|---------|
+| alice.base | ✅ Registered | 0x5a66...3876 | 2025 |
+| bob.base | ✅ Registered | 0x5a66...3876 | 2025 |
+| crypto.base | ✅ Registered | 0x5a66...3876 | 2025 |
+| defi.base | ✅ Registered | 0x5a66...3876 | 2025 |
+| web3.base | ✅ Registered | 0x5a66...3876 | 2025 |
+| nft.base | ✅ Registered | 0x5a66...3876 | 2025 |
+| *+4 more domains* | ✅ Registered | 0x5a66...3876 | 2025 |
 
 ## 🎯 **Key Features**
 
@@ -113,7 +111,7 @@ base-names/
 ### Prerequisites
 - Node.js 18+
 - MetaMask or compatible Web3 wallet
-- ETH on Base mainnet for registration
+- Base Sepolia testnet ETH
 
 ### Environment Setup
 ```bash
@@ -147,12 +145,11 @@ cd base-name-service-fork
 npx hardhat run scripts/deploy-sepolia.js --network base-sepolia
 ```
 
-#### Mainnet (Base) - DEPLOYED ✅
+#### Mainnet (Base)
 ```bash
 cd base-name-service-fork
-npx hardhat run scripts/deploy-base-ens.js --network base
+npx hardhat run scripts/deploy-sepolia.js --network base
 ```
-*Contracts already deployed and operational on Base mainnet*
 
 ## 🛡️ **Security**
 
@@ -186,11 +183,10 @@ npx hardhat run scripts/deploy-base-ens.js --network base
 
 ## 🔗 **Links**
 
-- **🌐 LIVE WEBSITE**: https://basenameservice.xyz
-- **📊 BaseScan (Mainnet)**: https://basescan.org
-- **⛓️ Base Network**: https://base.org
-- **📖 ENS Documentation**: https://docs.ens.domains
-- **💰 Register Domain**: https://basenameservice.xyz
+- **Live Frontend**: http://localhost:3001 (local)
+- **Base Sepolia Explorer**: https://sepolia.basescan.org
+- **Base Mainnet**: https://base.org
+- **ENS Documentation**: https://docs.ens.domains
 
 ## 📧 **Contact**
 
@@ -204,6 +200,6 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ---
 
-**🚀 LIVE on Base Mainnet • First .base TLD • Register Now at basenameservice.xyz**
+**🚀 Ready for Base L2 • Built for Scale • Investor Ready**
 
-*Base Names - Own Your Digital Identity on Base Layer 2*
+*Base Names - Own Your Digital Identity on Base*

@@ -2,6 +2,17 @@ import { keccak256, toBytes } from 'viem';
 
 // Contract addresses and ABIs for Base Name Service
 export const CONTRACTS = {
+  BASE_MAINNET: {
+    chainId: 8453,
+    contracts: {
+      ENSRegistry: "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E",
+      BaseRegistrar: "0xD158de26c787ABD1E0f2955C442fea9d4DC0a917",
+      BaseController: "0xca7FD90f4C76FbCdbdBB3427804374b16058F55e",
+      PublicResolver: "0x5D5bC53bDa5105561371FEf50B50E03aA94c962E",
+      ReverseRegistrar: "0xD982f3bFf21dCb9421ffBC2000Cfe3C94A01c889",
+      BasePriceOracle: "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC"
+    }
+  },
   BASE_SEPOLIA: {
     chainId: 84532,
     contracts: {

@@ -36,7 +36,7 @@ function StatCard({ title, value, change, icon: Icon, format = 'number' }: {
   title: string;
   value: number;
   change: number;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   format?: 'number' | 'currency' | 'percentage';
 }) {
   const formatValue = () => {

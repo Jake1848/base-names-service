@@ -215,7 +215,7 @@ export default function MarketplacePage() {
                     Marketplace Coming Soon
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    We're building a premium marketplace for .base domains. Join our waitlist to be notified when it launches.
+                    We&apos;re building a premium marketplace for .base domains. Join our waitlist to be notified when it launches.
                   </p>
                   <div className="space-y-3">
                     <Button variant="premium" size="lg">

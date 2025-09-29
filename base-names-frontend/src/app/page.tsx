@@ -256,7 +256,7 @@ function DomainSearchSection() {
                     {price ? (
                       <div className="text-center mb-4">
                         <span className="text-2xl font-bold">
-                          {formatPrice((price as any)[0])} ETH
+                          {formatPrice((price as [bigint, bigint])[0])} ETH
                         </span>
                         <span className="text-muted-foreground ml-2">/ year</span>
                       </div>

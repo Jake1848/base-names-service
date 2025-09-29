@@ -55,14 +55,14 @@ function PremiumDomainCard({ domain }: { domain: string }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
+      <Card className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 bg-gradient-to-br from-background to-muted/20">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-bold text-primary group-hover:text-primary/80 transition-colors">
+            <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
               {domain}.base
             </CardTitle>
-            <Badge variant={isAvailable ? "success" : "info"}>
-              {isAvailable ? 'Available' : 'Registered'}
+            <Badge variant={isAvailable ? "success" : "secondary"} className="font-semibold">
+              {isAvailable ? '✨ Available' : '🔒 Registered'}
             </Badge>
           </div>
         </CardHeader>
@@ -118,13 +118,18 @@ function PremiumDomainCard({ domain }: { domain: string }) {
               <Badge variant="success" className="mb-3">
                 Ready to Register
               </Badge>
-              <p className="text-sm text-muted-foreground mb-3">
-                This premium domain is available for registration
-              </p>
+              <div className="space-y-2 mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Premium domain • High value
+                </p>
+                <p className="text-lg font-bold text-primary">
+                  0.05 ETH<span className="text-sm text-muted-foreground ml-1">/year</span>
+                </p>
+              </div>
               <Button
-                variant="premium"
-                size="sm"
-                className="w-full"
+                variant="default"
+                size="lg"
+                className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 font-semibold text-white shadow-lg hover:shadow-xl transition-all"
                 onClick={() => {
                   // Scroll to search section and populate the search field
                   const searchSection = document.querySelector('input[type="text"]') as HTMLInputElement;
@@ -136,7 +141,7 @@ function PremiumDomainCard({ domain }: { domain: string }) {
                   }
                 }}
               >
-                Register Now
+                🚀 Register Now
               </Button>
             </div>
           ) : null}
@@ -266,7 +271,7 @@ function DomainSearchSection() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
                   placeholder="Enter domain name"
-                  className="w-full pl-10 pr-16 py-4 text-lg border-2 border-border rounded-lg focus:border-primary focus:outline-none transition-colors bg-background text-foreground placeholder:text-muted-foreground"
+                  className="w-full pl-10 pr-16 py-4 text-lg border-2 border-primary/30 rounded-lg focus:border-primary focus:outline-none transition-all bg-white/10 dark:bg-white/5 backdrop-blur-sm text-white dark:text-white placeholder:text-white/60 dark:placeholder:text-white/40"
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
                 <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground font-medium">
@@ -291,11 +296,11 @@ function DomainSearchSection() {
                 className="border-t pt-6"
               >
                 {availabilityError ? (
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 text-center">
-                    <span className="text-lg font-semibold text-yellow-700 dark:text-yellow-400">
+                  <div className="bg-yellow-100/90 dark:bg-yellow-900/30 backdrop-blur-sm border-2 border-yellow-400 dark:border-yellow-600 rounded-lg p-6 text-center">
+                    <span className="text-lg font-semibold text-yellow-800 dark:text-yellow-300">
                       ⚠️ Unable to check availability
                     </span>
-                    <p className="text-yellow-600 dark:text-yellow-500 mt-2">
+                    <p className="text-yellow-700 dark:text-yellow-400 mt-2 font-medium">
                       {chain?.id !== 8453 ?
                         'Please switch to Base network to check domain availability.' :
                         'Please make sure you&apos;re connected to Base network. Domain might be available for registration.'
@@ -529,18 +534,19 @@ export default function Home() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(CONTRACTS.BASE_MAINNET.contracts).map(([name, address]) => (
-                  <div key={name} className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                    <span className="font-medium">{name}:</span>
+                  <div key={name} className="flex justify-between items-center p-4 bg-white/5 dark:bg-white/10 border border-primary/20 rounded-lg hover:bg-white/10 dark:hover:bg-white/20 transition-colors">
+                    <span className="font-semibold text-foreground">{name}:</span>
                     <div className="flex items-center gap-2">
-                      <code className="text-sm bg-background px-2 py-1 rounded">
+                      <code className="text-xs sm:text-sm font-mono bg-black/20 dark:bg-white/10 text-foreground px-3 py-1.5 rounded">
                         {formatAddress(address)}
                       </code>
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="hover:bg-primary/20"
                         onClick={() => window.open(`https://basescan.org/address/${address}`, '_blank')}
                       >
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

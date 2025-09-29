@@ -121,7 +121,21 @@ function PremiumDomainCard({ domain }: { domain: string }) {
               <p className="text-sm text-muted-foreground mb-3">
                 This premium domain is available for registration
               </p>
-              <Button variant="premium" size="sm" className="w-full">
+              <Button
+                variant="premium"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  // Scroll to search section and populate the search field
+                  const searchSection = document.querySelector('input[type="text"]') as HTMLInputElement;
+                  if (searchSection) {
+                    searchSection.value = domain;
+                    searchSection.dispatchEvent(new Event('input', { bubbles: true }));
+                    searchSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    searchSection.focus();
+                  }
+                }}
+              >
                 Register Now
               </Button>
             </div>
@@ -152,10 +166,10 @@ function DomainSearchSection() {
   });
 
   const { data: price, error: priceError } = useReadContract({
-    address: CONTRACTS.BASE_MAINNET.contracts.BasePriceOracle as `0x${string}`,
-    abi: ABIS.BasePriceOracle,
-    functionName: 'price',
-    args: [searchTerm, BigInt(0), BigInt(365 * 24 * 60 * 60)], // 1 year
+    address: CONTRACTS.BASE_MAINNET.contracts.BaseController as `0x${string}`,
+    abi: ABIS.BaseController,
+    functionName: 'rentPrice',
+    args: [searchTerm, BigInt(365 * 24 * 60 * 60)], // 1 year
     query: { enabled: !!searchTerm && searchTerm.length > 0 && isAvailable === true }
   });
 
@@ -186,13 +200,29 @@ function DomainSearchSection() {
   };
 
   const handleRegister = () => {
-    if (!tokenId || !isConnected || !address) return;
+    if (!searchTerm || !isConnected || !address || !price) return;
+
+    // Generate a random secret for the commitment
+    const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
+
+    // Calculate total price (base + premium)
+    const totalPrice = price[0] + price[1];
 
     writeContract({
-      address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
-      abi: ABIS.BaseRegistrar,
+      address: CONTRACTS.BASE_MAINNET.contracts.BaseController as `0x${string}`,
+      abi: ABIS.BaseController,
       functionName: 'register',
-      args: [tokenId, address, BigInt(365 * 24 * 60 * 60)],
+      args: [
+        searchTerm, // name
+        address, // owner
+        BigInt(365 * 24 * 60 * 60), // duration (1 year)
+        secret, // secret
+        CONTRACTS.BASE_MAINNET.contracts.PublicResolver as `0x${string}`, // resolver
+        [], // data (empty for now)
+        true, // reverseRecord
+        0 // ownerControlledFuses
+      ],
+      value: totalPrice // Send ETH with the transaction
     });
   };
 

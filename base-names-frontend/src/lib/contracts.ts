@@ -77,6 +77,37 @@ export const ABIS = {
       ]
     }
   ] as const,
+  BaseController: [
+    {
+      name: 'register',
+      type: 'function',
+      stateMutability: 'payable',
+      inputs: [
+        { name: 'name', type: 'string' },
+        { name: 'owner', type: 'address' },
+        { name: 'duration', type: 'uint256' },
+        { name: 'secret', type: 'bytes32' },
+        { name: 'resolver', type: 'address' },
+        { name: 'data', type: 'bytes[]' },
+        { name: 'reverseRecord', type: 'bool' },
+        { name: 'ownerControlledFuses', type: 'uint16' }
+      ],
+      outputs: []
+    },
+    {
+      name: 'rentPrice',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [
+        { name: 'name', type: 'string' },
+        { name: 'duration', type: 'uint256' }
+      ],
+      outputs: [
+        { name: 'base', type: 'uint256' },
+        { name: 'premium', type: 'uint256' }
+      ]
+    }
+  ] as const,
   ENSRegistry: [
     "function owner(bytes32 node) view returns (address)",
     "function resolver(bytes32 node) view returns (address)",

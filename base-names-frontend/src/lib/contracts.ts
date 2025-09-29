@@ -105,8 +105,9 @@ export const PREMIUM_DOMAINS = [
 ];
 
 // Utility functions
-export function labelHash(label: string): `0x${string}` {
-  return keccak256(toBytes(label));
+export function labelHash(label: string): bigint {
+  const hash = keccak256(toBytes(label));
+  return BigInt(hash);
 }
 
 export function namehash(name: string): `0x${string}` {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useSwitchChain } from 'wagmi';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CONTRACTS, ABIS, PREMIUM_DOMAINS, labelHash } from '@/lib/contracts';
@@ -135,8 +135,9 @@ function PremiumDomainCard({ domain }: { domain: string }) {
 function DomainSearchSection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const { isConnected, address } = useAccount();
+  const { isConnected, address, chain } = useAccount();
   const { writeContract } = useWriteContract();
+  const { switchChain } = useSwitchChain();
 
   const tokenId = searchTerm ? labelHash(searchTerm) : null;
 
@@ -251,14 +252,26 @@ function DomainSearchSection() {
                 className="border-t pt-6"
               >
                 {availabilityError ? (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                    <span className="text-lg font-semibold text-yellow-700">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 text-center">
+                    <span className="text-lg font-semibold text-yellow-700 dark:text-yellow-400">
                       ⚠️ Unable to check availability
                     </span>
-                    <p className="text-yellow-600 mt-2">
-                      Please make sure you&apos;re connected to Base network. Domain might be available for registration.
+                    <p className="text-yellow-600 dark:text-yellow-500 mt-2">
+                      {chain?.id !== 8453 ?
+                        'Please switch to Base network to check domain availability.' :
+                        'Please make sure you&apos;re connected to Base network. Domain might be available for registration.'
+                      }
                     </p>
-                    <p className="text-sm text-yellow-500 mt-1">Error: {availabilityError.message}</p>
+                    {chain?.id !== 8453 && switchChain && (
+                      <Button
+                        onClick={() => switchChain({ chainId: 8453 })}
+                        variant="outline"
+                        className="mt-4"
+                      >
+                        Switch to Base Network
+                      </Button>
+                    )}
+                    <p className="text-xs text-yellow-500 dark:text-yellow-600 mt-2">Debug: {availabilityError.message}</p>
                   </div>
                 ) : isCheckingAvailability || isAvailable === undefined ? (
                   <div className="text-center py-4">

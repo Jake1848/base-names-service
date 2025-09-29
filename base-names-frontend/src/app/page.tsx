@@ -264,17 +264,17 @@ function DomainSearchSection() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <Search className="h-5 w-5 text-muted-foreground" />
+                  <Search className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </div>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
                   placeholder="Enter domain name"
-                  className="w-full pl-10 pr-16 py-4 text-lg border-2 border-primary/30 rounded-lg focus:border-primary focus:outline-none transition-all bg-white/10 dark:bg-white/5 backdrop-blur-sm text-white dark:text-white placeholder:text-white/60 dark:placeholder:text-white/40"
+                  className="w-full pl-10 pr-16 py-4 text-lg border-2 border-primary/30 rounded-lg focus:border-primary focus:outline-none transition-all bg-white/90 dark:bg-white/10 backdrop-blur-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground font-medium">
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-400 font-medium">
                   .base
                 </span>
               </div>
@@ -759,10 +759,10 @@ export default function Home() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(CONTRACTS.BASE_MAINNET.contracts).map(([name, address]) => (
-                  <div key={name} className="flex justify-between items-center p-4 bg-white/5 dark:bg-white/10 border border-primary/20 rounded-lg hover:bg-white/10 dark:hover:bg-white/20 transition-colors">
-                    <span className="font-semibold text-foreground">{name}:</span>
+                  <div key={name} className="flex justify-between items-center p-4 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-primary/20 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+                    <span className="font-semibold text-gray-900 dark:text-white">{name}:</span>
                     <div className="flex items-center gap-2">
-                      <code className="text-xs sm:text-sm font-mono bg-black/20 dark:bg-white/10 text-foreground px-3 py-1.5 rounded">
+                      <code className="text-xs sm:text-sm font-mono bg-white dark:bg-black/30 text-gray-900 dark:text-white px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700">
                         {formatAddress(address)}
                       </code>
                       <Button

@@ -140,7 +140,7 @@ function DomainSearchSection() {
 
   const tokenId = searchTerm ? labelHash(searchTerm) : null;
 
-  const { data: isAvailable } = useReadContract({
+  const { data: isAvailable, error: availabilityError, isLoading: isCheckingAvailability } = useReadContract({
     address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
     abi: ABIS.BaseRegistrar,
     functionName: 'available',
@@ -148,12 +148,23 @@ function DomainSearchSection() {
     query: { enabled: !!tokenId && searchTerm.length > 0 }
   });
 
-  const { data: price } = useReadContract({
+  const { data: price, error: priceError } = useReadContract({
     address: CONTRACTS.BASE_MAINNET.contracts.BasePriceOracle as `0x${string}`,
     abi: ABIS.BasePriceOracle,
     functionName: 'price',
     args: [searchTerm, BigInt(0), BigInt(365 * 24 * 60 * 60)], // 1 year
-    query: { enabled: !!searchTerm && searchTerm.length > 0 }
+    query: { enabled: !!searchTerm && searchTerm.length > 0 && isAvailable === true }
+  });
+
+  // Debugging: Log contract call results
+  console.log('Search Debug:', {
+    searchTerm,
+    tokenId: tokenId?.toString(),
+    isAvailable,
+    availabilityError: availabilityError?.message,
+    price: price?.toString(),
+    priceError: priceError?.message,
+    isCheckingAvailability
   });
 
   const handleSearch = async () => {
@@ -239,7 +250,17 @@ function DomainSearchSection() {
                 animate={{ opacity: 1, height: 'auto' }}
                 className="border-t pt-6"
               >
-                {isAvailable === undefined ? (
+                {availabilityError ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <span className="text-lg font-semibold text-yellow-700">
+                      ⚠️ Unable to check availability
+                    </span>
+                    <p className="text-yellow-600 mt-2">
+                      Please make sure you're connected to Base network. Domain might be available for registration.
+                    </p>
+                    <p className="text-sm text-yellow-500 mt-1">Error: {availabilityError.message}</p>
+                  </div>
+                ) : isCheckingAvailability || isAvailable === undefined ? (
                   <div className="text-center py-4">
                     <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
                     <p className="text-muted-foreground">Checking availability...</p>

@@ -3,21 +3,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { REGISTERED_DOMAINS } from '@/lib/contracts';
+import { PREMIUM_DOMAINS } from '@/lib/contracts';
 import { TrendingUp, Users, DollarSign, Activity, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const mockAnalytics = {
-  totalDomains: REGISTERED_DOMAINS.length,
-  totalRevenue: REGISTERED_DOMAINS.length * 0.05,
+  totalDomains: PREMIUM_DOMAINS.length,
+  totalRevenue: PREMIUM_DOMAINS.length * 0.05,
   averagePrice: 0.05,
-  totalUsers: REGISTERED_DOMAINS.length,
+  totalUsers: PREMIUM_DOMAINS.length,
   growth: {
     domains: 25.5,
     revenue: 32.1,
     users: 18.9
   },
-  recentRegistrations: REGISTERED_DOMAINS.slice(0, 5).map((domain, index) => ({
+  recentRegistrations: PREMIUM_DOMAINS.slice(0, 5).map((domain, index) => ({
     domain: `${domain}.base`,
     price: 0.05,
     timestamp: Date.now() - (index * 86400000), // Days ago

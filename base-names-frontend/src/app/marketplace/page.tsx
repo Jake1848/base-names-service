@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { REGISTERED_DOMAINS } from '@/lib/contracts';
+import { PREMIUM_DOMAINS } from '@/lib/contracts';
 import { Search, Filter, Heart, ExternalLink, Zap, Crown, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -264,7 +264,7 @@ export default function MarketplacePage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Sales</span>
-                    <span className="font-bold">{REGISTERED_DOMAINS.length}</span>
+                    <span className="font-bold">{PREMIUM_DOMAINS.length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">24h Change</span>

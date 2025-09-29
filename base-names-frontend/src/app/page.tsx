@@ -146,7 +146,9 @@ function DomainSearchSection() {
     abi: ABIS.BaseRegistrar,
     functionName: 'available',
     args: tokenId ? [tokenId] : undefined,
-    query: { enabled: !!tokenId && searchTerm.length > 0 }
+    query: {
+      enabled: !!tokenId && searchTerm.length > 0
+    }
   });
 
   const { data: price, error: priceError } = useReadContract({
@@ -158,15 +160,22 @@ function DomainSearchSection() {
   });
 
   // Debugging: Log contract call results
-  console.log('Search Debug:', {
-    searchTerm,
-    tokenId: tokenId?.toString(),
-    isAvailable,
-    availabilityError: availabilityError?.message,
-    price: price?.toString(),
-    priceError: priceError?.message,
-    isCheckingAvailability
-  });
+  if (searchTerm) {
+    console.log('🔍 Search Debug:', {
+      searchTerm,
+      tokenId: tokenId?.toString(),
+      tokenIdHex: tokenId ? `0x${tokenId.toString(16)}` : null,
+      contractAddress: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar,
+      chainId: chain?.id,
+      isConnected,
+      isAvailable,
+      availabilityError: availabilityError?.message || availabilityError,
+      availabilityErrorFull: availabilityError,
+      price: price?.toString(),
+      priceError: priceError?.message,
+      isCheckingAvailability
+    });
+  }
 
   const handleSearch = async () => {
     if (!searchTerm) return;

@@ -28,16 +28,55 @@ export const CONTRACTS = {
 // Simplified ABIs for the functions we need
 export const ABIS = {
   BaseRegistrar: [
-    "function available(uint256 id) view returns (bool)",
-    "function ownerOf(uint256 tokenId) view returns (address)",
-    "function nameExpires(uint256 id) view returns (uint256)",
-    "function register(uint256 id, address owner, uint256 duration) external",
-    "function controllers(address) view returns (bool)",
-    "function addController(address controller) external"
-  ],
+    {
+      name: 'available',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'id', type: 'uint256' }],
+      outputs: [{ name: '', type: 'bool' }]
+    },
+    {
+      name: 'ownerOf',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'tokenId', type: 'uint256' }],
+      outputs: [{ name: '', type: 'address' }]
+    },
+    {
+      name: 'nameExpires',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'id', type: 'uint256' }],
+      outputs: [{ name: '', type: 'uint256' }]
+    },
+    {
+      name: 'register',
+      type: 'function',
+      stateMutability: 'nonpayable',
+      inputs: [
+        { name: 'id', type: 'uint256' },
+        { name: 'owner', type: 'address' },
+        { name: 'duration', type: 'uint256' }
+      ],
+      outputs: []
+    }
+  ] as const,
   BasePriceOracle: [
-    "function price(string name, uint256 expires, uint256 duration) view returns (uint256, uint256)"
-  ],
+    {
+      name: 'price',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [
+        { name: 'name', type: 'string' },
+        { name: 'expires', type: 'uint256' },
+        { name: 'duration', type: 'uint256' }
+      ],
+      outputs: [
+        { name: 'basePremium', type: 'uint256' },
+        { name: 'premium', type: 'uint256' }
+      ]
+    }
+  ] as const,
   ENSRegistry: [
     "function owner(bytes32 node) view returns (address)",
     "function resolver(bytes32 node) view returns (address)",

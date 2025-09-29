@@ -256,7 +256,7 @@ function DomainSearchSection() {
                       ⚠️ Unable to check availability
                     </span>
                     <p className="text-yellow-600 mt-2">
-                      Please make sure you're connected to Base network. Domain might be available for registration.
+                      Please make sure you&apos;re connected to Base network. Domain might be available for registration.
                     </p>
                     <p className="text-sm text-yellow-500 mt-1">Error: {availabilityError.message}</p>
                   </div>

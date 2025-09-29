@@ -122,18 +122,52 @@ export const ABIS = {
 };
 
 // Premium domains available for registration
-export const PREMIUM_DOMAINS = [
-  "eth",
-  "coinbase",
-  "base",
-  "web3",
-  "defi",
-  "nft",
-  "crypto",
-  "blockchain",
-  "bitcoin",
-  "ethereum"
-];
+// Premium domains organized by category
+export const PREMIUM_DOMAINS_CATEGORIES = {
+  crypto: [
+    "btc", "eth", "sol", "bnb", "ada", "dot", "matic", "link", "uni", "aave"
+  ],
+  brands: [
+    "coinbase", "base", "opensea", "uniswap", "metamask", "binance", "kraken"
+  ],
+  web3: [
+    "web3", "defi", "nft", "dao", "dapp", "meta", "verse", "chain", "block"
+  ],
+  finance: [
+    "bank", "pay", "swap", "lend", "loan", "cash", "mint", "burn", "yield"
+  ],
+  names: [
+    "john", "alice", "bob", "charlie", "david", "emma", "frank", "grace"
+  ],
+  singles: [
+    "a", "b", "c", "x", "y", "z", "0", "1", "7", "8", "9"
+  ],
+  tech: [
+    "ai", "app", "api", "dev", "code", "data", "tech", "node", "core"
+  ],
+  gaming: [
+    "game", "play", "win", "level", "score", "hero", "quest", "raid"
+  ]
+};
+
+// Flatten all premium domains for backward compatibility
+export const PREMIUM_DOMAINS = Object.values(PREMIUM_DOMAINS_CATEGORIES).flat();
+
+// Domain pricing tiers
+export const DOMAIN_PRICING = {
+  premium: "0.1",  // ETH
+  rare: "0.05",     // ETH
+  standard: "0.01"  // ETH
+};
+
+// Get domain tier based on characteristics
+export function getDomainTier(domain: string): 'premium' | 'rare' | 'standard' {
+  if (domain.length === 1) return 'premium';
+  if (domain.length === 2) return 'premium';
+  if (domain.length === 3) return 'rare';
+  if (PREMIUM_DOMAINS.includes(domain)) return 'rare';
+  return 'standard';
+}
 
 // Utility functions
 export function labelHash(label: string): bigint {

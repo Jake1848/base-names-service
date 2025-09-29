@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useReadContract, useWriteContract, useSwitchChain } from 'wagmi';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { CONTRACTS, ABIS, PREMIUM_DOMAINS, labelHash } from '@/lib/contracts';
+import { CONTRACTS, ABIS, PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING, labelHash } from '@/lib/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -374,11 +374,56 @@ function DomainSearchSection() {
 }
 
 function StatsSection() {
+  const [registeredCount, setRegisteredCount] = useState(0);
+  const [totalValue, setTotalValue] = useState('0');
+
+  // Check registration status for all premium domains
+  const domainStatuses = PREMIUM_DOMAINS.slice(0, 20).map(domain => {
+    const tokenId = labelHash(domain);
+    const { data: isAvailable } = useReadContract({
+      address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
+      abi: ABIS.BaseRegistrar,
+      functionName: 'available',
+      args: [tokenId],
+    });
+    return { domain, isAvailable };
+  });
+
+  useEffect(() => {
+    const registered = domainStatuses.filter(d => d.isAvailable === false).length;
+    setRegisteredCount(registered);
+    setTotalValue((registered * 0.05).toFixed(2));
+  }, [domainStatuses]);
+
   const stats = [
-    { icon: Users, label: 'Available Premium Domains', value: PREMIUM_DOMAINS.length.toString(), color: 'text-primary' },
-    { icon: Zap, label: 'Base Mainnet Chain', value: '8453', color: 'text-primary' },
-    { icon: TrendingUp, label: 'Registration Price', value: '0.05 ETH', color: 'text-primary' },
-    { icon: Globe, label: 'Network Status', value: 'Live', color: 'text-primary' }
+    {
+      icon: Users,
+      label: 'Premium Domains',
+      value: PREMIUM_DOMAINS.length.toString(),
+      subtext: `${registeredCount} registered`,
+      gradient: 'from-blue-500 to-cyan-500'
+    },
+    {
+      icon: Zap,
+      label: 'Base Chain ID',
+      value: '8453',
+      subtext: 'Layer 2',
+      gradient: 'from-purple-500 to-pink-500'
+    },
+    {
+      icon: TrendingUp,
+      label: 'Starting Price',
+      value: '0.01 ETH',
+      subtext: 'Standard domains',
+      gradient: 'from-green-500 to-emerald-500'
+    },
+    {
+      icon: Globe,
+      label: 'Total Value',
+      value: `${totalValue} ETH`,
+      subtext: 'Domains registered',
+      gradient: 'from-orange-500 to-red-500'
+    }
   ];
 
   return (
@@ -390,12 +435,18 @@ function StatsSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-          <Card className="text-center hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <stat.icon className={cn("h-8 w-8 mx-auto mb-3", stat.color)} />
-              <div className={cn("text-3xl font-bold mb-1", stat.color)}>
+          <Card className="relative overflow-hidden hover:shadow-2xl transition-all hover:scale-105 border-2 border-primary/10 hover:border-primary/30">
+            <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-10`} />
+            <CardContent className="pt-6 relative">
+              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.gradient} mb-4`}>
+                <stat.icon className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-3xl font-bold mb-1 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {stat.value}
               </div>
+              {stat.subtext && (
+                <p className="text-xs text-muted-foreground mt-1">{stat.subtext}</p>
+              )}
               <div className="text-sm text-muted-foreground">{stat.label}</div>
             </CardContent>
           </Card>
@@ -443,6 +494,197 @@ function FeaturesSection() {
         </motion.div>
       ))}
     </div>
+  );
+}
+
+function PremiumDomainsSection() {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const [displayCount, setDisplayCount] = useState(12);
+
+  // Get domains based on selected category
+  const getDomainsToShow = () => {
+    if (selectedCategory === 'all') {
+      return PREMIUM_DOMAINS.slice(0, displayCount);
+    }
+    const categoryDomains = PREMIUM_DOMAINS_CATEGORIES[selectedCategory as keyof typeof PREMIUM_DOMAINS_CATEGORIES];
+    return categoryDomains ? categoryDomains.slice(0, displayCount) : [];
+  };
+
+  const domainsToShow = getDomainsToShow();
+
+  const categories = [
+    { id: 'all', label: 'All Domains', icon: '🌐' },
+    { id: 'crypto', label: 'Crypto', icon: '₿' },
+    { id: 'brands', label: 'Brands', icon: '🏢' },
+    { id: 'web3', label: 'Web3', icon: '🔗' },
+    { id: 'finance', label: 'Finance', icon: '💰' },
+    { id: 'names', label: 'Names', icon: '👤' },
+    { id: 'singles', label: 'Singles', icon: '1️⃣' },
+    { id: 'tech', label: 'Tech', icon: '💻' },
+    { id: 'gaming', label: 'Gaming', icon: '🎮' }
+  ];
+
+  return (
+    <section className="py-16">
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+          Premium .base Domains
+        </h2>
+        <p className="text-xl text-muted-foreground">
+          {PREMIUM_DOMAINS.length}+ curated premium domains across multiple categories
+        </p>
+      </div>
+
+      {/* Category Filter */}
+      <div className="flex flex-wrap gap-2 justify-center mb-8">
+        {categories.map((cat) => (
+          <Button
+            key={cat.id}
+            variant={selectedCategory === cat.id ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCategory(cat.id)}
+            className="rounded-full"
+          >
+            <span className="mr-1">{cat.icon}</span>
+            {cat.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* Available Filter Toggle */}
+      <div className="flex justify-center mb-8">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showOnlyAvailable}
+            onChange={(e) => setShowOnlyAvailable(e.target.checked)}
+            className="w-4 h-4 text-primary"
+          />
+          <span className="text-muted-foreground">Show only available domains</span>
+        </label>
+      </div>
+
+      {/* Domains Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {domainsToShow.map((domain, index) => (
+          <motion.div
+            key={`${selectedCategory}-${domain}`}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
+          >
+            <DynamicDomainCard domain={domain} showOnlyAvailable={showOnlyAvailable} />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Load More Button */}
+      {displayCount < (selectedCategory === 'all' ? PREMIUM_DOMAINS.length :
+        (PREMIUM_DOMAINS_CATEGORIES[selectedCategory as keyof typeof PREMIUM_DOMAINS_CATEGORIES]?.length || 0)) && (
+        <div className="text-center mt-8">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => setDisplayCount(prev => prev + 12)}
+            className="rounded-full"
+          >
+            Load More Domains
+          </Button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function DynamicDomainCard({ domain, showOnlyAvailable }: { domain: string; showOnlyAvailable: boolean }) {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const tokenId = labelHash(domain);
+  const tier = getDomainTier(domain);
+  const price = DOMAIN_PRICING[tier];
+
+  const { data: isAvailable, refetch } = useReadContract({
+    address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
+    abi: ABIS.BaseRegistrar,
+    functionName: 'available',
+    args: [tokenId],
+  });
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [refetch]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  // Filter out taken domains if needed
+  if (showOnlyAvailable && isAvailable === false) {
+    return null;
+  }
+
+  const tierColors = {
+    premium: 'from-yellow-500 to-amber-500',
+    rare: 'from-purple-500 to-pink-500',
+    standard: 'from-blue-500 to-cyan-500'
+  };
+
+  return (
+    <Card className={`relative hover:shadow-xl transition-all hover:scale-105 ${
+      isAvailable === false ? 'opacity-75' : ''
+    }`}>
+      <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${tierColors[tier]} opacity-10 rounded-bl-full`} />
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-bold text-lg">{domain}.base</h3>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleRefresh}
+            className={`p-1 ${isRefreshing ? 'animate-spin' : ''}`}
+          >
+            🔄
+          </Button>
+        </div>
+
+        <div className="flex justify-between items-center mb-3">
+          <Badge variant={isAvailable ? 'success' : 'secondary'}>
+            {isAvailable ? '✅ Available' : '🔒 Taken'}
+          </Badge>
+          <span className="text-sm font-semibold">{price} ETH</span>
+        </div>
+
+        {isAvailable && (
+          <Button
+            className="w-full"
+            size="sm"
+            onClick={() => {
+              const searchSection = document.querySelector('input[type="text"]') as HTMLInputElement;
+              if (searchSection) {
+                searchSection.value = domain;
+                searchSection.dispatchEvent(new Event('input', { bubbles: true }));
+                searchSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                searchSection.focus();
+              }
+            }}
+          >
+            Register
+          </Button>
+        )}
+
+        {!isAvailable && (
+          <p className="text-xs text-muted-foreground text-center">
+            View on marketplace →
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -505,24 +747,7 @@ export default function Home() {
         </section>
 
         {/* Premium Domains Section */}
-        <section className="py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Premium .base Domains</h2>
-            <p className="text-xl text-muted-foreground">Get these valuable domains before anyone else</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PREMIUM_DOMAINS.map((domain, index) => (
-              <motion.div
-                key={domain}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <PremiumDomainCard domain={domain} />
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        <PremiumDomainsSection />
 
         {/* Contract Info */}
         <section className="py-16">

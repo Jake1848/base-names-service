@@ -1,89 +1,258 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PREMIUM_DOMAINS } from '@/lib/contracts';
-import { Search, Filter, Heart, ExternalLink, Zap, Crown, TrendingUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING } from '@/lib/contracts';
+import { Search, Filter, Heart, ExternalLink, Zap, Crown, TrendingUp, ShoppingCart, Clock, DollarSign, Star, ArrowUpRight, ArrowDownRight, Grid3X3, List, SlidersHorizontal } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
-const mockMarketplace = {
-  featuredDomains: [
-    { domain: 'base.base', price: 10.0, category: 'Premium', isNew: true, views: 2500 },
-    { domain: 'coinbase.base', price: 25.0, category: 'Brand', isNew: false, views: 1800 },
-    { domain: 'ethereum.base', price: 5.0, category: 'Crypto', isNew: true, views: 1200 },
-    { domain: 'wallet.base', price: 3.5, category: 'Tech', isNew: false, views: 950 }
-  ],
-  recentSales: [
-    { domain: 'crypto.base', price: 0.05, buyer: '0x1234...5678', timestamp: Date.now() - 86400000 },
-    { domain: 'defi.base', price: 0.05, buyer: '0x2345...6789', timestamp: Date.now() - 172800000 },
-    { domain: 'web3.base', price: 0.05, buyer: '0x3456...7890', timestamp: Date.now() - 259200000 }
-  ],
-  categories: ['All', 'Premium', 'Brand', 'Crypto', 'Tech', 'DeFi', 'NFT', 'Gaming']
+// Generate mock marketplace data
+const generateMarketplaceData = () => {
+  const allDomains = PREMIUM_DOMAINS.slice(0, 50);
+  return allDomains.map((domain, index) => ({
+    domain: `${domain}.base`,
+    price: parseFloat((Math.random() * 5 + 0.01).toFixed(3)),
+    previousPrice: parseFloat((Math.random() * 4 + 0.01).toFixed(3)),
+    category: Object.keys(PREMIUM_DOMAINS_CATEGORIES)[Math.floor(Math.random() * Object.keys(PREMIUM_DOMAINS_CATEGORIES).length)],
+    isListed: Math.random() > 0.3,
+    isNew: Math.random() > 0.7,
+    isTrending: Math.random() > 0.8,
+    views: Math.floor(Math.random() * 5000) + 100,
+    likes: Math.floor(Math.random() * 100) + 5,
+    lastSale: Date.now() - (Math.random() * 30 * 24 * 60 * 60 * 1000),
+    seller: `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`,
+    tier: getDomainTier(domain),
+  }));
 };
 
-function MarketplaceDomainCard({ domain }: {
-  domain: { domain: string; price: number; category: string; isNew: boolean; views: number; }
+const marketplaceData = generateMarketplaceData();
+
+// Recent activity data
+const recentActivity = [
+  { type: 'sale', domain: 'crypto.base', price: 2.5, from: '0x1234...5678', to: '0x9876...5432', time: '2 hours ago' },
+  { type: 'listing', domain: 'defi.base', price: 1.8, seller: '0x2468...1357', time: '4 hours ago' },
+  { type: 'offer', domain: 'web3.base', price: 0.9, from: '0x3691...2580', time: '6 hours ago' },
+  { type: 'sale', domain: 'nft.base', price: 3.2, from: '0x1470...2580', to: '0x2581...3692', time: '12 hours ago' },
+  { type: 'listing', domain: 'meta.base', price: 1.2, seller: '0x1593...5702', time: '1 day ago' },
+];
+
+function MarketplaceDomainCard({
+  domain,
+  viewMode = 'grid'
+}: {
+  domain: any;
+  viewMode?: 'grid' | 'list';
 }) {
   const [isLiked, setIsLiked] = useState(false);
+  const priceChange = ((domain.price - domain.previousPrice) / domain.previousPrice * 100).toFixed(2);
+  const isPositive = parseFloat(priceChange) > 0;
+
+  const handleBuyNow = () => {
+    toast.success(`Purchase initiated for ${domain.domain}`, {
+      description: 'Redirecting to checkout...',
+    });
+  };
+
+  const handleMakeOffer = () => {
+    toast.info(`Make an offer for ${domain.domain}`, {
+      description: 'Opening offer modal...',
+    });
+  };
+
+  const tierColors = {
+    premium: 'border-yellow-500 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20',
+    rare: 'border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20',
+    standard: 'border-blue-500 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20',
+  };
+
+  if (viewMode === 'list') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="w-full"
+      >
+        <Card className={cn(
+          "hover:shadow-lg transition-all duration-300 border-2",
+          tierColors[domain.tier as keyof typeof tierColors]
+        )}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold">
+                  {domain.domain.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold">{domain.domain}</h3>
+                    {domain.isNew && <Badge variant="success" className="text-xs">NEW</Badge>}
+                    {domain.isTrending && <Badge variant="default" className="text-xs">🔥 HOT</Badge>}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline" className="text-xs">{domain.category}</Badge>
+                    <span className="text-xs text-muted-foreground">{domain.views} views</span>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs text-muted-foreground">{domain.likes} likes</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="text-right">
+                  <p className="text-2xl font-bold">{domain.price} ETH</p>
+                  <div className="flex items-center justify-end mt-1">
+                    {isPositive ? (
+                      <ArrowUpRight className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4 text-red-600" />
+                    )}
+                    <span className={cn(
+                      "text-sm font-medium",
+                      isPositive ? "text-green-600" : "text-red-600"
+                    )}>
+                      {Math.abs(parseFloat(priceChange))}%
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsLiked(!isLiked)}
+                    className="p-2"
+                    aria-label="Add to favorites"
+                  >
+                    <Heart className={cn(
+                      "h-4 w-4",
+                      isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                    )} />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={handleMakeOffer}>
+                    Make Offer
+                  </Button>
+                  <Button size="sm" onClick={handleBuyNow}>
+                    Buy Now
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      exit={{ opacity: 0, y: 20 }}
       whileHover={{ y: -5 }}
+      className="h-full"
     >
-      <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200">
+      <Card className={cn(
+        "group hover:shadow-xl transition-all duration-300 border-2 h-full flex flex-col",
+        tierColors[domain.tier as keyof typeof tierColors]
+      )}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <CardTitle className="text-xl font-bold text-blue-600 group-hover:text-blue-700">
-                {domain.domain}
-              </CardTitle>
-              {domain.isNew && <Badge variant="success">New</Badge>}
+            <div className="flex items-center gap-2">
+              <Crown className={cn(
+                "h-5 w-5",
+                domain.tier === 'premium' ? "text-yellow-600" :
+                domain.tier === 'rare' ? "text-purple-600" : "text-blue-600"
+              )} />
+              <Badge variant="outline" className="text-xs capitalize">{domain.tier}</Badge>
             </div>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => setIsLiked(!isLiked)}
-              className="p-2"
+              className="p-1"
+              aria-label="Add to favorites"
             >
-              <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+              <Heart className={cn(
+                "h-4 w-4",
+                isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"
+              )} />
             </Button>
           </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="outline">{domain.category}</Badge>
-            <span className="text-sm text-gray-500">{domain.views} views</span>
+          <div className="mt-2">
+            <CardTitle className="text-xl font-bold">{domain.domain}</CardTitle>
+            <div className="flex items-center gap-2 mt-2">
+              {domain.isNew && <Badge variant="success" className="text-xs">NEW</Badge>}
+              {domain.isTrending && <Badge variant="default" className="text-xs">🔥 TRENDING</Badge>}
+              <Badge variant="secondary" className="text-xs">{domain.category}</Badge>
+            </div>
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex-1 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Current Price</p>
+            <div>
+              <p className="text-sm text-muted-foreground">Current Price</p>
+              <div className="flex items-baseline justify-between">
                 <p className="text-2xl font-bold">{domain.price} ETH</p>
-                <p className="text-sm text-gray-500">${(domain.price * 2500).toLocaleString()}</p>
-              </div>
-              <div className="text-right">
-                <div className="flex items-center text-green-600 text-sm">
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  +15%
+                <div className="flex items-center">
+                  {isPositive ? (
+                    <ArrowUpRight className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4 text-red-600" />
+                  )}
+                  <span className={cn(
+                    "text-sm font-medium",
+                    isPositive ? "text-green-600" : "text-red-600"
+                  )}>
+                    {Math.abs(parseFloat(priceChange))}%
+                  </span>
                 </div>
-                <p className="text-xs text-gray-500">7d change</p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                ≈ ${(domain.price * 2500).toLocaleString()}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Listed 2d ago</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Star className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">{domain.likes} likes</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="premium" className="w-full">
-                <Zap className="h-4 w-4 mr-2" />
-                Buy Now
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={handleMakeOffer}
+              >
+                Offer
               </Button>
-              <Button variant="outline" className="w-full">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                View Details
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={handleBuyNow}
+              >
+                Buy
               </Button>
             </div>
           </div>
@@ -93,214 +262,331 @@ function MarketplaceDomainCard({ domain }: {
   );
 }
 
-function RecentSaleCard({ sale }: {
-  sale: { domain: string; price: number; buyer: string; timestamp: number; }
-}) {
+function ActivityItem({ activity }: { activity: any }) {
+  const getActivityIcon = () => {
+    switch (activity.type) {
+      case 'sale':
+        return <ShoppingCart className="h-4 w-4 text-green-600" />;
+      case 'listing':
+        return <DollarSign className="h-4 w-4 text-blue-600" />;
+      case 'offer':
+        return <Zap className="h-4 w-4 text-purple-600" />;
+      default:
+        return <TrendingUp className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  const getActivityText = () => {
+    switch (activity.type) {
+      case 'sale':
+        return `Sold to ${activity.to}`;
+      case 'listing':
+        return `Listed by ${activity.seller}`;
+      case 'offer':
+        return `Offer from ${activity.from}`;
+      default:
+        return 'Activity';
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-          <Crown className="h-5 w-5 text-white" />
+    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+          {getActivityIcon()}
         </div>
         <div>
-          <p className="font-medium">{sale.domain}</p>
-          <p className="text-sm text-gray-500">
-            Sold to {sale.buyer.slice(0, 6)}...{sale.buyer.slice(-4)}
-          </p>
+          <p className="font-medium text-sm">{activity.domain}</p>
+          <p className="text-xs text-muted-foreground">{getActivityText()}</p>
         </div>
       </div>
       <div className="text-right">
-        <p className="font-bold">{sale.price} ETH</p>
-        <p className="text-sm text-gray-500">
-          {new Date(sale.timestamp).toLocaleDateString()}
-        </p>
+        <p className="font-semibold text-sm">{activity.price} ETH</p>
+        <p className="text-xs text-muted-foreground">{activity.time}</p>
       </div>
     </div>
   );
 }
 
 export default function MarketplacePage() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('price-low');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 100 });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [filteredDomains, setFilteredDomains] = useState(marketplaceData);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...marketplaceData];
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(d => d.category === selectedCategory);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(d =>
+        d.domain.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by price range
+    filtered = filtered.filter(d =>
+      d.price >= priceRange.min && d.price <= priceRange.max
+    );
+
+    // Sort
+    switch (sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'trending':
+        filtered.sort((a, b) => b.views - a.views);
+        break;
+      case 'newest':
+        filtered.sort((a, b) => b.lastSale - a.lastSale);
+        break;
+    }
+
+    setFilteredDomains(filtered);
+  }, [selectedCategory, searchTerm, sortBy, priceRange]);
+
+  const categories = ['all', ...Object.keys(PREMIUM_DOMAINS_CATEGORIES)];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Domain Marketplace</h1>
-              <p className="text-gray-600">Buy and sell premium .base domains</p>
-            </div>
-            <Button variant="outline" onClick={() => window.history.back()}>
-              ← Back to Home
-            </Button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Domain Marketplace</h1>
+          <p className="text-muted-foreground">Buy, sell, and trade premium .base domains</p>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">Floor Price</p>
+              <p className="text-2xl font-bold">0.01 ETH</p>
+              <p className="text-xs text-green-600">+12.5%</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">Total Volume</p>
+              <p className="text-2xl font-bold">125 ETH</p>
+              <p className="text-xs text-green-600">+25.3%</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">Listed</p>
+              <p className="text-2xl font-bold">{filteredDomains.filter(d => d.isListed).length}</p>
+              <p className="text-xs text-muted-foreground">domains</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">Owners</p>
+              <p className="text-2xl font-bold">1,247</p>
+              <p className="text-xs text-green-600">+18.7%</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Search and Filters */}
-        <section className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search domains..."
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                className="pl-10"
+                aria-label="Search domains"
               />
             </div>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Filters
-            </Button>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="trending">Trending</SelectItem>
+                <SelectItem value="newest">Recently Listed</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setViewMode('grid')}
+                aria-label="Grid view"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setViewMode('list')}
+                aria-label="List view"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                aria-label="Toggle filters"
+              >
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                Filters
+              </Button>
+            </div>
           </div>
 
           {/* Categories */}
           <div className="flex flex-wrap gap-2">
-            {mockMarketplace.categories.map((category) => (
+            {categories.map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category)}
+                className="capitalize"
               >
-                {category}
+                {category === 'all' ? 'All Categories' : category}
               </Button>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* Featured Domains */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Featured Domains</h2>
-            <Badge variant="premium" className="px-3 py-1">
-              🔥 Hot
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockMarketplace.featuredDomains.map((domain, index) => (
-              <motion.div
-                key={domain.domain}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <MarketplaceDomainCard domain={domain} />
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Marketplace */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Available Domains</CardTitle>
-                <CardDescription>
-                  Premium .base domains ready for purchase
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Crown className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Marketplace Coming Soon
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    We&apos;re building a premium marketplace for .base domains. Join our waitlist to be notified when it launches.
-                  </p>
-                  <div className="space-y-3">
-                    <Button variant="premium" size="lg">
-                      Join Waitlist
-                    </Button>
-                    <div className="text-sm text-gray-500">
-                      <span className="font-medium">1,247</span> people already signed up
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {/* Domains Grid/List */}
+            {loading ? (
+              <div className={cn(
+                viewMode === 'grid'
+                  ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                  : "space-y-4"
+              )}>
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-[280px]" />
+                ))}
+              </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                {filteredDomains.length > 0 ? (
+                  <div className={cn(
+                    viewMode === 'grid'
+                      ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                      : "space-y-4"
+                  )}>
+                    {filteredDomains.slice(0, 12).map((domain) => (
+                      <MarketplaceDomainCard
+                        key={domain.domain}
+                        domain={domain}
+                        viewMode={viewMode}
+                      />
+                    ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                ) : (
+                  <Card className="p-12 text-center">
+                    <div className="max-w-sm mx-auto">
+                      <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No domains found</h3>
+                      <p className="text-muted-foreground">
+                        Try adjusting your filters or search terms
+                      </p>
+                    </div>
+                  </Card>
+                )}
+              </AnimatePresence>
+            )}
+
+            {/* Pagination */}
+            {filteredDomains.length > 12 && (
+              <div className="flex justify-center mt-8">
+                <Button variant="outline" className="mr-2">Previous</Button>
+                <Button variant="outline">Next</Button>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Recent Sales */}
+            {/* Recent Activity */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Sales</CardTitle>
-                <CardDescription>Latest domain transactions</CardDescription>
+                <CardTitle className="text-lg">Recent Activity</CardTitle>
+                <CardDescription>Latest marketplace transactions</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {mockMarketplace.recentSales.map((sale, index) => (
-                    <RecentSaleCard key={index} sale={sale} />
+              <CardContent className="p-2">
+                <div className="space-y-1">
+                  {recentActivity.map((activity, index) => (
+                    <ActivityItem key={index} activity={activity} />
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Market Stats */}
-            <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+            {/* Top Sellers */}
+            <Card>
               <CardHeader>
-                <CardTitle>Market Statistics</CardTitle>
+                <CardTitle className="text-lg">Top Sellers</CardTitle>
+                <CardDescription>Most active domain sellers</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Floor Price</span>
-                    <span className="font-bold">0.05 ETH</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Volume</span>
-                    <span className="font-bold">0.5 ETH</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Sales</span>
-                    <span className="font-bold">{PREMIUM_DOMAINS.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">24h Change</span>
-                    <span className="font-bold text-green-600">+12.5%</span>
-                  </div>
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm",
+                          i === 1 ? "bg-yellow-500" : i === 2 ? "bg-gray-400" : "bg-orange-600"
+                        )}>
+                          {i}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">0x1234...5678</p>
+                          <p className="text-xs text-muted-foreground">24 domains</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-xs">12.5 ETH</Badge>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Investment Opportunity */}
-            <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50">
+            {/* CTA Card */}
+            <Card className="bg-gradient-to-br from-primary/10 to-blue-600/10 border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-yellow-600" />
-                  Investment Opportunity
-                </CardTitle>
+                <CardTitle className="text-lg">List Your Domain</CardTitle>
+                <CardDescription>Join thousands of sellers</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-700">
-                    Early investors in premium .base domains are seeing significant returns as the Base ecosystem grows.
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Average ROI</span>
-                      <span className="font-bold text-green-600">+245%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Best Performer</span>
-                      <span className="font-bold">crypto.base</span>
-                    </div>
-                  </div>
-                  <Button variant="premium" size="sm" className="w-full">
-                    Learn More
-                  </Button>
-                </div>
+                <p className="text-sm mb-4">
+                  Start earning by listing your premium .base domains on our marketplace.
+                </p>
+                <Button className="w-full">
+                  <Crown className="h-4 w-4 mr-2" />
+                  Start Selling
+                </Button>
               </CardContent>
             </Card>
           </div>

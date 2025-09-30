@@ -115,6 +115,9 @@ function MarketplaceDomainCard({
   domain: any;
   viewMode?: 'grid' | 'list';
 }) {
+  // All hooks must be called before any early returns
+  const [isLiked, setIsLiked] = useState(false);
+
   console.log('🔍 MarketplaceDomainCard received domain:', domain);
 
   // Safety check for domain object
@@ -127,8 +130,6 @@ function MarketplaceDomainCard({
     console.error('❌ MarketplaceDomainCard received non-object domain:', typeof domain, domain);
     return null;
   }
-
-  const [isLiked, setIsLiked] = useState(false);
 
   // Safety check for price calculations
   const safePrice = typeof domain.price === 'number' ? domain.price : 0;

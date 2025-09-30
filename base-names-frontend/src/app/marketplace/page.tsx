@@ -40,7 +40,7 @@ function useRealMarketplaceData() {
 
   // Generate real marketplace data from blockchain
   const realDomains = PREMIUM_DOMAINS.slice(0, 50).map((domain, index) => {
-    const isAvailable = availabilityData?.[index]?.result as boolean;
+    const isAvailable = Boolean(availabilityData?.[index]?.result);
     const category = Object.keys(PREMIUM_DOMAINS_CATEGORIES)[Math.floor(index / 7)] || 'crypto';
 
     return {
@@ -71,7 +71,7 @@ function useRealMarketplaceData() {
 
 // Convert blockchain events to activity format
 function formatRecentActivity(events: any[], sales: any[]) {
-  const activity = [];
+  const activity: any[] = [];
 
   // Add recent registrations as listings
   events.slice(0, 3).forEach(event => {

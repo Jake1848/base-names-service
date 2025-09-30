@@ -215,7 +215,7 @@ export function TestMinting() {
 
               <div className="text-sm text-muted-foreground">
                 <p>
-                  <strong>Business Model Impact:</strong> Since you don't own these contracts,
+                  <strong>Business Model Impact:</strong> Since you don&apos;t own these contracts,
                   consider focusing on secondary marketplace features, premium services, or
                   partnering with Base rather than competing directly.
                 </p>
@@ -237,7 +237,7 @@ export function TestMinting() {
               <li>Test with Base Sepolia testnet first (free)</li>
               <li>Start with a 4+ character domain (cheaper: 0.01 ETH)</li>
               <li>Ensure you have extra ETH for gas fees (~0.001-0.002 ETH)</li>
-              <li>Double-check you're on Base mainnet (Chain ID: 8453)</li>
+              <li>Double-check you&apos;re on Base mainnet (Chain ID: 8453)</li>
               <li>Verify contract addresses match exactly</li>
             </ul>
           </div>

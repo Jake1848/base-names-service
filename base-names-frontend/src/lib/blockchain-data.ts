@@ -93,7 +93,7 @@ export function useMarketplaceData() {
         setLoading(true);
 
         // Get transfer events to track sales (non-zero to non-zero transfers)
-        const fromBlock = currentBlock - 2000n;
+        const fromBlock = currentBlock - BigInt(2000);
 
         const logs = await publicClient.getLogs({
           address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
@@ -191,7 +191,7 @@ export function useRegistrationEvents() {
         setLoading(true);
 
         // Get registration events from the last 1000 blocks
-        const fromBlock = currentBlock - 1000n;
+        const fromBlock = currentBlock - BigInt(1000);
 
         const logs = await publicClient.getLogs({
           address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,

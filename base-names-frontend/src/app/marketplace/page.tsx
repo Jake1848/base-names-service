@@ -73,6 +73,11 @@ function useRealMarketplaceData() {
 function formatRecentActivity(events: any[], sales: any[]) {
   const activity: any[] = [];
 
+  // Safety check for events array
+  if (!events || !Array.isArray(events)) {
+    return activity;
+  }
+
   // Add recent registrations as listings
   events.slice(0, 3).forEach(event => {
     if (event.domain) {
@@ -87,7 +92,8 @@ function formatRecentActivity(events: any[], sales: any[]) {
   });
 
   // Add recent sales
-  sales.slice(0, 2).forEach(sale => {
+  if (sales && Array.isArray(sales)) {
+    sales.slice(0, 2).forEach(sale => {
     activity.push({
       type: 'sale',
       domain: sale.domain,
@@ -97,6 +103,7 @@ function formatRecentActivity(events: any[], sales: any[]) {
       time: new Date(sale.timestamp).toLocaleDateString(),
     });
   });
+  }
 
   return activity.slice(0, 5);
 }
@@ -374,14 +381,20 @@ export default function MarketplacePage() {
   const [filteredDomains, setFilteredDomains] = useState<any[]>([]);
 
   // Get real marketplace data
-  const marketplaceData = useRealMarketplaceData();
-  const { events: registrationEvents } = useRegistrationEvents();
-  const loading = marketplaceData.loading;
+  const marketplaceData = useRealMarketplaceData() || { domains: [], recentSales: [], totalVolume: 0, floorPrice: 0.01, loading: true };
+  const { events: registrationEvents = [] } = useRegistrationEvents() || {};
+  const loading = marketplaceData?.loading || false;
 
   // Get recent activity from real events
-  const recentActivity = formatRecentActivity(registrationEvents, marketplaceData.recentSales);
+  const recentActivity = formatRecentActivity(registrationEvents || [], marketplaceData?.recentSales || []);
 
   useEffect(() => {
+    // Ensure domains is an array before filtering
+    if (!marketplaceData.domains || !Array.isArray(marketplaceData.domains)) {
+      setFilteredDomains([]);
+      return;
+    }
+
     let filtered = [...marketplaceData.domains];
 
     // Filter by category
@@ -595,9 +608,13 @@ export default function MarketplacePage() {
               </CardHeader>
               <CardContent className="p-2">
                 <div className="space-y-1">
-                  {recentActivity.map((activity, index) => (
-                    <ActivityItem key={index} activity={activity} />
-                  ))}
+                  {recentActivity && Array.isArray(recentActivity) && recentActivity.length > 0 ? (
+                    recentActivity.map((activity, index) => (
+                      <ActivityItem key={index} activity={activity} />
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground p-4 text-center">No recent activity</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

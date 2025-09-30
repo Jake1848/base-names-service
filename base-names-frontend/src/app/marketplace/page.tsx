@@ -115,18 +115,35 @@ function MarketplaceDomainCard({
   domain: any;
   viewMode?: 'grid' | 'list';
 }) {
+  console.log('🔍 MarketplaceDomainCard received domain:', domain);
+
+  // Safety check for domain object
+  if (!domain) {
+    console.error('❌ MarketplaceDomainCard received null/undefined domain');
+    return null;
+  }
+
+  if (typeof domain !== 'object') {
+    console.error('❌ MarketplaceDomainCard received non-object domain:', typeof domain, domain);
+    return null;
+  }
+
   const [isLiked, setIsLiked] = useState(false);
-  const priceChange = ((domain.price - domain.previousPrice) / domain.previousPrice * 100).toFixed(2);
+
+  // Safety check for price calculations
+  const safePrice = typeof domain.price === 'number' ? domain.price : 0;
+  const safePreviousPrice = typeof domain.previousPrice === 'number' ? domain.previousPrice : safePrice;
+  const priceChange = safePreviousPrice > 0 ? ((safePrice - safePreviousPrice) / safePreviousPrice * 100).toFixed(2) : '0';
   const isPositive = parseFloat(priceChange) > 0;
 
   const handleBuyNow = () => {
-    toast.success(`Purchase initiated for ${domain.domain}`, {
+    toast.success(`Purchase initiated for ${domain?.domain || 'domain'}`, {
       description: 'Redirecting to checkout...',
     });
   };
 
   const handleMakeOffer = () => {
-    toast.info(`Make an offer for ${domain.domain}`, {
+    toast.info(`Make an offer for ${domain?.domain || 'domain'}`, {
       description: 'Opening offer modal...',
     });
   };
@@ -153,11 +170,11 @@ function MarketplaceDomainCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold">
-                  {domain.domain.charAt(0).toUpperCase()}
+                  {domain?.domain ? domain.domain.charAt(0).toUpperCase() : '?'}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-bold">{domain.domain}</h3>
+                    <h3 className="text-lg font-bold">{domain?.domain || 'Unknown'}</h3>
                     {domain.isNew && <Badge variant="success" className="text-xs">NEW</Badge>}
                     {domain.isTrending && <Badge variant="default" className="text-xs">🔥 HOT</Badge>}
                   </div>
@@ -252,7 +269,7 @@ function MarketplaceDomainCard({
             </Button>
           </div>
           <div className="mt-2">
-            <CardTitle className="text-xl font-bold">{domain.domain}</CardTitle>
+            <CardTitle className="text-xl font-bold">{domain?.domain || 'Unknown'}</CardTitle>
             <div className="flex items-center gap-2 mt-2">
               {domain.isNew && <Badge variant="success" className="text-xs">NEW</Badge>}
               {domain.isTrending && <Badge variant="default" className="text-xs">🔥 TRENDING</Badge>}
@@ -385,8 +402,14 @@ export default function MarketplacePage() {
   const { events: registrationEvents = [] } = useRegistrationEvents() || {};
   const loading = marketplaceData?.loading || false;
 
+  // Debug logging
+  console.log('🔍 MarketplacePage - marketplaceData:', marketplaceData);
+  console.log('🔍 MarketplacePage - registrationEvents:', registrationEvents);
+  console.log('🔍 MarketplacePage - filteredDomains length:', filteredDomains?.length);
+
   // Get recent activity from real events
   const recentActivity = formatRecentActivity(registrationEvents || [], marketplaceData?.recentSales || []);
+  console.log('🔍 MarketplacePage - recentActivity:', recentActivity);
 
   useEffect(() => {
     // Ensure domains is an array before filtering
@@ -434,6 +457,7 @@ export default function MarketplacePage() {
   }, [selectedCategory, searchTerm, sortBy, priceRange, marketplaceData.domains]);
 
   const categories = ['all', ...Object.keys(PREMIUM_DOMAINS_CATEGORIES)];
+  console.log('🔍 MarketplacePage - categories:', categories);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -531,17 +555,24 @@ export default function MarketplacePage() {
 
           {/* Categories */}
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category)}
-                className="capitalize"
-              >
-                {category === 'all' ? 'All Categories' : category}
-              </Button>
-            ))}
+            {categories.map((category, index) => {
+              console.log('🔍 Rendering category button:', index, category, typeof category);
+              if (typeof category !== 'string') {
+                console.error('❌ Invalid category:', category);
+                return null;
+              }
+              return (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                  className="capitalize"
+                >
+                  {category === 'all' ? 'All Categories' : category}
+                </Button>
+              );
+            })}
           </div>
         </div>
 
@@ -567,13 +598,20 @@ export default function MarketplacePage() {
                       ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
                       : "space-y-4"
                   )}>
-                    {filteredDomains.slice(0, 12).map((domain) => (
-                      <MarketplaceDomainCard
-                        key={domain.domain}
-                        domain={domain}
-                        viewMode={viewMode}
-                      />
-                    ))}
+                    {filteredDomains.slice(0, 12).map((domain, index) => {
+                      console.log('🔍 Rendering domain:', index, domain);
+                      if (!domain || !domain.domain) {
+                        console.error('❌ Invalid domain object:', domain);
+                        return null;
+                      }
+                      return (
+                        <MarketplaceDomainCard
+                          key={domain.domain}
+                          domain={domain}
+                          viewMode={viewMode}
+                        />
+                      );
+                    })}
                   </div>
                 ) : (
                   <Card className="p-12 text-center">
@@ -627,9 +665,19 @@ export default function MarketplacePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(PREMIUM_DOMAINS_CATEGORIES).map(([category, domains]) => {
-                    const count = filteredDomains.filter(d => d.category === category).length;
-                    const available = filteredDomains.filter(d => d.category === category && d.isAvailable).length;
+                  {Object.entries(PREMIUM_DOMAINS_CATEGORIES).map(([category, domains], index) => {
+                    console.log('🔍 Rendering category stats:', index, category, domains);
+                    if (!category || typeof category !== 'string') {
+                      console.error('❌ Invalid category:', category);
+                      return null;
+                    }
+                    if (!Array.isArray(filteredDomains)) {
+                      console.error('❌ filteredDomains is not an array:', filteredDomains);
+                      return null;
+                    }
+
+                    const count = filteredDomains.filter(d => d && d.category === category).length;
+                    const available = filteredDomains.filter(d => d && d.category === category && d.isAvailable).length;
 
                     return (
                       <div key={category} className="flex items-center justify-between">

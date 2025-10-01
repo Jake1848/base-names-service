@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { Header } from "@/components/header";
+import { EnhancedHeader } from "@/components/enhanced-header";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -48,23 +48,79 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
-export default function RootLayout({
+export default function EnhancedRootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased min-h-screen flex flex-col`}>
+      <head>
+        {/* Preload critical fonts */}
+        <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        
+        {/* Performance optimizations */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Theme color for mobile browsers */}
+        <meta name="theme-color" content="#0052ff" />
+        <meta name="msapplication-TileColor" content="#0052ff" />
+        
+        {/* Prevent zoom on iOS */}
+        <meta name="format-detection" content="telephone=no" />
+      </head>
+      <body className={`${inter.className} antialiased min-h-screen flex flex-col overflow-x-hidden`}>
         <Providers>
-          <Header />
-          <main id="main-content" className="flex-1">
+          {/* Skip to main content for screen readers */}
+          <a 
+            href="#main-content" 
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-md z-50 focus:z-[9999]"
+          >
+            Skip to main content
+          </a>
+          
+          <EnhancedHeader />
+          
+          <main 
+            id="main-content" 
+            className="flex-1 relative"
+            role="main"
+            aria-label="Main content"
+          >
             {children}
           </main>
+          
           <Footer />
-          <Toaster position="bottom-right" />
+          
+          {/* Toast notifications */}
+          <Toaster 
+            position="bottom-right" 
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: 'hsl(var(--background))',
+                color: 'hsl(var(--foreground))',
+                border: '1px solid hsl(var(--border))',
+              },
+            }}
+          />
+          
+          {/* Accessibility announcements */}
+          <div 
+            id="announcements" 
+            aria-live="polite" 
+            aria-atomic="true" 
+            className="sr-only"
+          />
         </Providers>
       </body>
     </html>

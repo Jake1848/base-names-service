@@ -282,20 +282,34 @@ function DomainSearchSection() {
     query: { enabled: !!searchTerm && searchTerm.length > 0 && isAvailable === true && !validationError }
   });
 
-  // Real-time validation
+  // Real-time validation with debounced auto-search
   useEffect(() => {
     if (searchTerm) {
       const error = validateDomainName(searchTerm);
       setValidationError(error);
+
+      // Auto-search with debounce (500ms delay after user stops typing)
+      if (!error && searchTerm.length >= MIN_DOMAIN_LENGTH) {
+        const debounceTimer = setTimeout(() => {
+          setHasSearched(true);
+          // The availability check happens automatically via useReadContract
+        }, 500);
+
+        return () => clearTimeout(debounceTimer);
+      }
     } else {
       setValidationError(null);
+      setHasSearched(false);
     }
   }, [searchTerm]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     setSearchTerm(value);
-    setHasSearched(false);
+    // Reset hasSearched when user types, will be set automatically by debounce
+    if (value !== searchTerm) {
+      setHasSearched(false);
+    }
   };
 
   const handleSearch = async () => {
@@ -403,7 +417,7 @@ function DomainSearchSection() {
               Search & Register Domains
             </CardTitle>
             <CardDescription className="text-center">
-              Find your perfect .base domain name
+              Find your perfect .base domain name • Availability checked in real-time
             </CardDescription>
           </CardHeader>
 
@@ -456,15 +470,19 @@ function DomainSearchSection() {
                 variant="premium"
                 disabled={!searchTerm || isSearching || !!validationError}
                 className="sm:w-auto w-full focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label={isSearching ? 'Searching for domain' : 'Search for domain'}
+                aria-label={isSearching ? 'Checking availability' : 'Check domain availability'}
+                title="Availability is checked automatically as you type"
               >
-                {isSearching ? (
+                {isCheckingAvailability ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Searching...
+                    Checking...
                   </>
                 ) : (
-                  'Search'
+                  <>
+                    <Search className="h-4 w-4 mr-2" />
+                    Check Now
+                  </>
                 )}
               </Button>
             </div>

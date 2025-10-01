@@ -7,9 +7,8 @@ import "./IPriceOracle.sol";
 
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract StaticBulkRenewal is IBulkRenewal, ReentrancyGuard {
+contract StaticBulkRenewal is IBulkRenewal {
     ETHRegistrarController controller;
 
     constructor(ETHRegistrarController _controller) {
@@ -37,36 +36,34 @@ contract StaticBulkRenewal is IBulkRenewal, ReentrancyGuard {
         string[] calldata names,
         uint256 duration,
         bytes32 referrer
-    ) external payable override nonReentrant {
+    ) external payable override {
         uint256 length = names.length;
+        uint256 totalCost = 0;
 
-        // Cache prices to avoid calling rentPrice twice per domain
-        IPriceOracle.Price[] memory prices = new IPriceOracle.Price[](length);
-        uint256 total;
-
-        // First pass: Calculate total cost and cache prices
-        for (uint256 i = 0; i < length; ) {
-            prices[i] = controller.rentPrice(names[i], duration);
-            unchecked {
-                total += (prices[i].base + prices[i].premium);
-                ++i;
-            }
+        // 1. Calculate total cost first (Checks)
+        for (uint256 i = 0; i < length; i++) {
+            IPriceOracle.Price memory price = controller.rentPrice(
+                names[i],
+                duration
+            );
+            totalCost += (price.base + price.premium);
         }
 
-        // Ensure sufficient payment
-        require(msg.value >= total, "Insufficient payment for renewals");
+        require(msg.value >= totalCost, "Insufficient payment sent for all renewals");
 
-        // Second pass: Perform renewals using cached prices
-        for (uint256 i = 0; i < length; ) {
-            uint256 totalPrice = prices[i].base + prices[i].premium;
-            controller.renew{value: totalPrice}(names[i], duration, referrer);
-            unchecked {
-                ++i;
-            }
+        // 2. Perform renewals (Interactions)
+        for (uint256 i = 0; i < length; i++) {
+            IPriceOracle.Price memory price = controller.rentPrice(
+                names[i],
+                duration
+            );
+            uint256 renewalPrice = price.base + price.premium;
+            // The controller's renew function is payable, so we forward the specific amount for each renewal.
+            controller.renew{value: renewalPrice}(names[i], duration, referrer);
         }
 
-        // Refund any excess funds
-        uint256 excess = msg.value - total;
+        // 3. Refund any excess funds sent by the user (Effect)
+        uint256 excess = msg.value - totalCost;
         if (excess > 0) {
             Address.sendValue(payable(msg.sender), excess);
         }
@@ -80,3 +77,4 @@ contract StaticBulkRenewal is IBulkRenewal, ReentrancyGuard {
             interfaceID == type(IBulkRenewal).interfaceId;
     }
 }
+

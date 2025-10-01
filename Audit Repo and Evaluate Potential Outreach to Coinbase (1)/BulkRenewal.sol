@@ -10,9 +10,8 @@ import "./IPriceOracle.sol";
 
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract BulkRenewal is IBulkRenewal, ReentrancyGuard {
+contract BulkRenewal is IBulkRenewal {
     bytes32 private constant ETH_NAMEHASH =
         0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae;
 
@@ -55,37 +54,34 @@ contract BulkRenewal is IBulkRenewal, ReentrancyGuard {
         string[] calldata names,
         uint256 duration,
         bytes32 referrer
-    ) external payable override nonReentrant {
+    ) external payable override {
         ETHRegistrarController controller = getController();
         uint256 length = names.length;
+        uint256 totalCost = 0;
 
-        // Cache prices to avoid calling rentPrice twice per domain
-        IPriceOracle.Price[] memory prices = new IPriceOracle.Price[](length);
-        uint256 total;
-
-        // First pass: Calculate total cost and cache prices
-        for (uint256 i = 0; i < length; ) {
-            prices[i] = controller.rentPrice(names[i], duration);
-            unchecked {
-                total += (prices[i].base + prices[i].premium);
-                ++i;
-            }
+        // 1. Calculate total cost first (Checks)
+        for (uint256 i = 0; i < length; i++) {
+            IPriceOracle.Price memory price = controller.rentPrice(
+                names[i],
+                duration
+            );
+            totalCost += (price.base + price.premium);
         }
 
-        // Ensure sufficient payment
-        require(msg.value >= total, "Insufficient payment for renewals");
+        require(msg.value >= totalCost, "Insufficient payment sent for all renewals");
 
-        // Second pass: Perform renewals using cached prices
-        for (uint256 i = 0; i < length; ) {
-            uint256 totalPrice = prices[i].base + prices[i].premium;
-            controller.renew{value: totalPrice}(names[i], duration, referrer);
-            unchecked {
-                ++i;
-            }
+        // 2. Perform renewals (Interactions)
+        for (uint256 i = 0; i < length; i++) {
+            IPriceOracle.Price memory price = controller.rentPrice(
+                names[i],
+                duration
+            );
+            uint256 renewalPrice = price.base + price.premium;
+            controller.renew{value: renewalPrice}(names[i], duration, referrer);
         }
 
-        // Refund any excess funds
-        uint256 excess = msg.value - total;
+        // 3. Refund any excess funds sent by the user (Effect)
+        uint256 excess = msg.value - totalCost;
         if (excess > 0) {
             Address.sendValue(payable(msg.sender), excess);
         }
@@ -99,3 +95,4 @@ contract BulkRenewal is IBulkRenewal, ReentrancyGuard {
             interfaceID == type(IBulkRenewal).interfaceId;
     }
 }
+

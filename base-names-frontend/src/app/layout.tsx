@@ -64,17 +64,10 @@ export default function EnhancedRootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preload critical fonts */}
-        <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        
-        {/* Performance optimizations */}
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
         {/* Theme color for mobile browsers */}
         <meta name="theme-color" content="#0052ff" />
         <meta name="msapplication-TileColor" content="#0052ff" />
-        
+
         {/* Prevent zoom on iOS */}
         <meta name="format-detection" content="telephone=no" />
       </head>

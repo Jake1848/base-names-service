@@ -382,10 +382,17 @@ export default function MarketplacePage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filteredDomains, setFilteredDomains] = useState<any[]>([]);
 
-  // Get real marketplace data
-  const marketplaceData = useRealMarketplaceData() || { domains: [], recentSales: [], totalVolume: 0, floorPrice: 0.01, loading: true };
+  // Get real marketplace data with safe defaults
+  const rawMarketplaceData = useRealMarketplaceData();
+  const marketplaceData = {
+    domains: Array.isArray(rawMarketplaceData?.domains) ? rawMarketplaceData.domains : [],
+    recentSales: Array.isArray(rawMarketplaceData?.recentSales) ? rawMarketplaceData.recentSales : [],
+    totalVolume: rawMarketplaceData?.totalVolume || 0,
+    floorPrice: rawMarketplaceData?.floorPrice || 0.01,
+    loading: rawMarketplaceData?.loading || false,
+  };
   const { events: registrationEvents = [] } = useRegistrationEvents() || {};
-  const loading = marketplaceData?.loading || false;
+  const loading = marketplaceData.loading;
 
   // Get recent activity from real events
   const recentActivity = formatRecentActivity(registrationEvents || [], marketplaceData?.recentSales || []);

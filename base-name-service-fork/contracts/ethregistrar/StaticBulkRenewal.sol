@@ -7,8 +7,9 @@ import "./IPriceOracle.sol";
 
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract StaticBulkRenewal is IBulkRenewal {
+contract StaticBulkRenewal is IBulkRenewal, ReentrancyGuard {
     ETHRegistrarController controller;
 
     constructor(ETHRegistrarController _controller) {
@@ -36,7 +37,7 @@ contract StaticBulkRenewal is IBulkRenewal {
         string[] calldata names,
         uint256 duration,
         bytes32 referrer
-    ) external payable override {
+    ) external payable override nonReentrant {
         uint256 length = names.length;
         uint256 total;
         for (uint256 i = 0; i < length; ) {

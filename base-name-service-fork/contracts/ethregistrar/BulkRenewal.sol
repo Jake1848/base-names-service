@@ -10,8 +10,9 @@ import "./IPriceOracle.sol";
 
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract BulkRenewal is IBulkRenewal {
+contract BulkRenewal is IBulkRenewal, ReentrancyGuard {
     bytes32 private constant ETH_NAMEHASH =
         0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae;
 
@@ -54,7 +55,7 @@ contract BulkRenewal is IBulkRenewal {
         string[] calldata names,
         uint256 duration,
         bytes32 referrer
-    ) external payable override {
+    ) external payable override nonReentrant {
         ETHRegistrarController controller = getController();
         uint256 length = names.length;
         uint256 total;

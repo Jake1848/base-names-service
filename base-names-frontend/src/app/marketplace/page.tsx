@@ -16,7 +16,7 @@ import {
 import { PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING, CONTRACTS, ABIS, labelHash } from '@/lib/contracts';
 import { useRegistrationEvents, useMarketplaceData, useDomainOwnership } from '@/lib/blockchain-data';
 import { useReadContracts } from 'wagmi';
-import { Search, Filter, Heart, ExternalLink, Zap, Crown, TrendingUp, ShoppingCart, Clock, DollarSign, Star, ArrowUpRight, ArrowDownRight, Grid3X3, List, SlidersHorizontal } from 'lucide-react';
+import { Search, Heart, Crown, TrendingUp, ShoppingCart, DollarSign, Zap, ArrowUpRight, ArrowDownRight, Grid3X3, List, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -48,14 +48,11 @@ function useRealMarketplaceData() {
       price: parseFloat(DOMAIN_PRICING[getDomainTier(domain) as keyof typeof DOMAIN_PRICING]),
       previousPrice: parseFloat(DOMAIN_PRICING[getDomainTier(domain) as keyof typeof DOMAIN_PRICING]) * 0.9,
       category,
-      isListed: !isAvailable, // If not available, it's registered (could be listed)
+      isListed: !isAvailable,
       isAvailable,
       isNew: false,
       isTrending: registrationEvents.some(e => e.domain === `${domain}.base`),
-      views: 100 + index * 10, // Deterministic based on position
-      likes: 5 + index * 2,
       lastSale: Date.now() - (index * 24 * 60 * 60 * 1000),
-      seller: '0x0000...0000',
       tier: getDomainTier(domain),
     };
   });
@@ -81,10 +78,15 @@ function formatRecentActivity(events: any[], sales: any[]) {
   // Add recent registrations as listings
   events.slice(0, 3).forEach(event => {
     if (event.domain) {
+      // Extract domain name without .base suffix for tier calculation
+      const domainName = event.domain.replace('.base', '');
+      const tier = getDomainTier(domainName);
+      const price = parseFloat(DOMAIN_PRICING[tier as keyof typeof DOMAIN_PRICING]);
+
       activity.push({
         type: 'registration',
         domain: event.domain,
-        price: 0.05,
+        price,
         to: event.owner,
         time: new Date(event.timestamp).toLocaleDateString(),
       });
@@ -118,16 +120,12 @@ function MarketplaceDomainCard({
   // All hooks must be called before any early returns
   const [isLiked, setIsLiked] = useState(false);
 
-  console.log('🔍 MarketplaceDomainCard received domain:', domain);
-
   // Safety check for domain object
   if (!domain) {
-    console.error('❌ MarketplaceDomainCard received null/undefined domain');
     return null;
   }
 
   if (typeof domain !== 'object') {
-    console.error('❌ MarketplaceDomainCard received non-object domain:', typeof domain, domain);
     return null;
   }
 
@@ -180,10 +178,7 @@ function MarketplaceDomainCard({
                     {domain.isTrending && <Badge variant="default" className="text-xs">🔥 HOT</Badge>}
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="text-xs">{domain.category}</Badge>
-                    <span className="text-xs text-muted-foreground">{domain.views} views</span>
-                    <span className="text-xs text-muted-foreground">·</span>
-                    <span className="text-xs text-muted-foreground">{domain.likes} likes</span>
+                    <Badge variant="outline" className="text-xs capitalize">{domain.category}</Badge>
                   </div>
                 </div>
               </div>
@@ -304,18 +299,7 @@ function MarketplaceDomainCard({
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Listed 2d ago</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">{domain.likes} likes</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mt-2">
               <Button
                 size="sm"
                 variant="outline"
@@ -403,14 +387,8 @@ export default function MarketplacePage() {
   const { events: registrationEvents = [] } = useRegistrationEvents() || {};
   const loading = marketplaceData?.loading || false;
 
-  // Debug logging
-  console.log('🔍 MarketplacePage - marketplaceData:', marketplaceData);
-  console.log('🔍 MarketplacePage - registrationEvents:', registrationEvents);
-  console.log('🔍 MarketplacePage - filteredDomains length:', filteredDomains?.length);
-
   // Get recent activity from real events
   const recentActivity = formatRecentActivity(registrationEvents || [], marketplaceData?.recentSales || []);
-  console.log('🔍 MarketplacePage - recentActivity:', recentActivity);
 
   useEffect(() => {
     // Ensure domains is an array before filtering
@@ -447,7 +425,12 @@ export default function MarketplacePage() {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case 'trending':
-        filtered.sort((a, b) => b.views - a.views);
+        // Sort trending by isTrending first, then by lastSale
+        filtered.sort((a, b) => {
+          if (a.isTrending && !b.isTrending) return -1;
+          if (!a.isTrending && b.isTrending) return 1;
+          return b.lastSale - a.lastSale;
+        });
         break;
       case 'newest':
         filtered.sort((a, b) => b.lastSale - a.lastSale);
@@ -458,7 +441,6 @@ export default function MarketplacePage() {
   }, [selectedCategory, searchTerm, sortBy, priceRange, marketplaceData.domains]);
 
   const categories = ['all', ...Object.keys(PREMIUM_DOMAINS_CATEGORIES)];
-  console.log('🔍 MarketplacePage - categories:', categories);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -556,10 +538,8 @@ export default function MarketplacePage() {
 
           {/* Categories */}
           <div className="flex flex-wrap gap-2">
-            {categories.map((category, index) => {
-              console.log('🔍 Rendering category button:', index, category, typeof category);
+            {categories.map((category) => {
               if (typeof category !== 'string') {
-                console.error('❌ Invalid category:', category);
                 return null;
               }
               return (
@@ -599,10 +579,8 @@ export default function MarketplacePage() {
                       ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
                       : "space-y-4"
                   )}>
-                    {filteredDomains.slice(0, 12).map((domain, index) => {
-                      console.log('🔍 Rendering domain:', index, domain);
+                    {filteredDomains.slice(0, 12).map((domain) => {
                       if (!domain || !domain.domain) {
-                        console.error('❌ Invalid domain object:', domain);
                         return null;
                       }
                       return (
@@ -666,14 +644,11 @@ export default function MarketplacePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(PREMIUM_DOMAINS_CATEGORIES).map(([category, domains], index) => {
-                    console.log('🔍 Rendering category stats:', index, category, domains);
+                  {Object.entries(PREMIUM_DOMAINS_CATEGORIES).map(([category]) => {
                     if (!category || typeof category !== 'string') {
-                      console.error('❌ Invalid category:', category);
                       return null;
                     }
                     if (!Array.isArray(filteredDomains)) {
-                      console.error('❌ filteredDomains is not an array:', filteredDomains);
                       return null;
                     }
 

@@ -11,7 +11,6 @@ import { CONTRACTS, ABIS, PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomain
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { EnhancedModeToggle } from '@/components/enhanced-mode-toggle';
 import { AnimatedBackground } from '@/components/animated-background';
 import { cn, formatAddress, formatPrice, formatDate, getDaysUntilExpiry } from '@/lib/utils';
 
@@ -976,40 +975,6 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <AnimatedBackground />
-      {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50" role="banner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg" aria-hidden="true"></div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold">Base Names</h1>
-                <p className="text-sm text-muted-foreground hidden sm:block">Decentralized domains on Base L2</p>
-              </div>
-            </div>
-            <nav className="flex items-center space-x-2 sm:space-x-4" role="navigation" aria-label="Main navigation">
-              <Button
-                variant="ghost"
-                onClick={() => window.location.href = '/analytics'}
-                className="hidden sm:flex focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label="View analytics dashboard"
-              >
-                📊 Analytics
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => window.location.href = '/marketplace'}
-                className="hidden sm:flex focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label="Browse marketplace"
-              >
-                🏪 Marketplace
-              </Button>
-              <EnhancedModeToggle />
-              <ConnectButton />
-            </nav>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" role="main">

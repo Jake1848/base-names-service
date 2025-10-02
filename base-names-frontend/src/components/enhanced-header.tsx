@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Menu, X, Globe, TrendingUp, ShoppingBag, FileText, HelpCircle, Sun, Moon, Sparkles, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Globe, TrendingUp, ShoppingBag, FileText, HelpCircle, Sun, Moon, Sparkles, LayoutDashboard, Gavel, Building2, ArrowLeftRight, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,10 +40,12 @@ export function EnhancedHeader() {
   const navigation = [
     { name: 'Home', href: '/', icon: Globe },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Analytics', href: '/analytics', icon: TrendingUp },
+    { name: 'DeFi', href: '/defi', icon: Coins },
+    { name: 'Bridge', href: '/bridge', icon: ArrowLeftRight },
     { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
-    { name: 'Docs', href: '/docs', icon: FileText },
-    { name: 'Help', href: '/help', icon: HelpCircle },
+    { name: 'Auctions', href: '/auctions', icon: Gavel },
+    { name: 'Enterprise', href: '/enterprise', icon: Building2 },
+    { name: 'Analytics', href: '/analytics', icon: TrendingUp },
   ];
 
   const isActive = (href: string) => pathname === href;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,42 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Calendar, Clock, Settings, RefreshCw, Wallet, AlertCircle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
-
-interface DomainData {
-  tokenId: string;
-  name: string;
-  expires: number;
-  owner: string;
-  isExpiringSoon: boolean;
-  daysUntilExpiry: number;
-}
+import { useDomainOwnership } from '@/hooks/useDomainOwnership';
+import { CONTRACTS } from '@/lib/contracts';
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
-  const [domains, setDomains] = useState<DomainData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Calculate days until expiry
-  const getDaysUntilExpiry = (expiryTimestamp: number): number => {
-    const now = Math.floor(Date.now() / 1000);
-    const daysLeft = Math.floor((expiryTimestamp - now) / (24 * 60 * 60));
-    return daysLeft > 0 ? daysLeft : 0;
-  };
-
-  // Load user's domains
-  // NOTE: This is a placeholder. In production, you would:
-  // 1. Query blockchain events for domains registered by this address
-  // 2. Use a subgraph/indexer service like The Graph
-  // 3. Implement a backend API that tracks domain ownership
-  useEffect(() => {
-    if (isConnected && address) {
-      setTimeout(() => {
-        // Example placeholder data - replace with real blockchain queries
-        setDomains([]);
-        setLoading(false);
-      }, 1000);
-    }
-  }, [isConnected, address]);
+  const { domains, loading, error } = useDomainOwnership();
 
   if (!isConnected) {
     return (
@@ -138,7 +108,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {domains.map((domain) => (
                 <Card
-                  key={domain.tokenId}
+                  key={domain.tokenId.toString()}
                   className="hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/40"
                 >
                   <CardHeader className="pb-3">
@@ -155,11 +125,14 @@ export default function DashboardPage() {
                     <div className="space-y-3 text-sm">
                       <div className="flex items-center text-muted-foreground">
                         <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
-                        <span>Expires: {new Date(domain.expires * 1000).toLocaleDateString()}</span>
+                        <span>Expires: {new Date(Number(domain.expires) * 1000).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center text-muted-foreground">
                         <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
                         <span>{domain.daysUntilExpiry} days remaining</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground font-mono">
+                        Token ID: {domain.tokenId.toString().slice(0, 16)}...
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4">
@@ -170,7 +143,7 @@ export default function DashboardPage() {
                         asChild
                       >
                         <a
-                          href={`https://basescan.org/token/${domain.owner}`}
+                          href={`https://basescan.org/token/${CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar}/${domain.tokenId.toString()}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

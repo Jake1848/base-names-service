@@ -505,7 +505,7 @@ function EnhancedDomainSearch() {
             address,
             BigInt(365 * 24 * 60 * 60),
             commitmentSecret,
-            contracts.PublicResolver as `0x${string}`,
+            `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER - avoids ens.setRecord() call
             [],
             BigInt(0),
             `0x${'0'.repeat(64)}` as `0x${string}`
@@ -525,7 +525,7 @@ function EnhancedDomainSearch() {
         console.log('  [1] owner:', address);
         console.log('  [2] duration:', BigInt(365 * 24 * 60 * 60).toString());
         console.log('  [3] secret:', commitmentSecret);
-        console.log('  [4] resolver:', contracts.PublicResolver);
+        console.log('  [4] resolver:', '0x0000000000000000000000000000000000000000 (NO RESOLVER)');
         console.log('  [5] data: []');
         console.log('  [6] reverseRecord: false');
         console.log('  [7] ownerControlledFuses: 0');
@@ -543,7 +543,7 @@ function EnhancedDomainSearch() {
               address,
               BigInt(365 * 24 * 60 * 60),
               commitmentSecret, // Use the saved secret
-              contracts.PublicResolver as `0x${string}`,
+              `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER - avoids ens.setRecord() call that's failing
               [],
               false, // reverseRecord: false
               0 // ownerControlledFuses

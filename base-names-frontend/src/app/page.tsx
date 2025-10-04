@@ -250,8 +250,37 @@ function EnhancedDomainSearch() {
   const [waitTimeRemaining, setWaitTimeRemaining] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address, chain } = useAccount();
-  const { writeContract, isPending: isRegistering } = useWriteContract();
+  const { writeContract, isPending: isRegistering, data: txHash, error: txError, isSuccess: txSuccess } = useWriteContract();
   const { switchChain } = useSwitchChain();
+
+  // Log transaction results
+  useEffect(() => {
+    if (txHash) {
+      console.log('📝 Transaction hash received:', txHash);
+      toast.info(`Transaction submitted: ${txHash.slice(0, 10)}...`);
+    }
+  }, [txHash]);
+
+  useEffect(() => {
+    if (txError) {
+      console.error('❌ Transaction error:', txError);
+      toast.error(`Transaction failed: ${txError.message}`);
+      setRegistrationStep('idle');
+    }
+  }, [txError]);
+
+  useEffect(() => {
+    if (txSuccess) {
+      console.log('✅ Transaction successful!');
+      toast.success('Transaction confirmed!');
+      if (registrationStep === 'registering') {
+        toast.success(`Successfully registered ${searchTerm}.base!`);
+        setRegistrationStep('idle');
+        setCommitmentSecret(null);
+        setWaitTimeRemaining(0);
+      }
+    }
+  }, [txSuccess, registrationStep, searchTerm]);
 
   // Get contracts for current chain
   const currentChainId = chain?.id || 8453; // Default to Base Mainnet
@@ -346,17 +375,28 @@ function EnhancedDomainSearch() {
         // Generate secret for new registration
         const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
 
+        console.log('═══════════════════════════════════════════════════════');
+        console.log('🔐 STEP 1: MAKING COMMITMENT');
+        console.log('═══════════════════════════════════════════════════════');
+        console.log('Domain:', searchTerm);
+        console.log('Owner:', address);
+        console.log('Duration:', 365 * 24 * 60 * 60, 'seconds (1 year)');
+        console.log('Secret:', secret);
+        console.log('Resolver:', contracts.PublicResolver);
+        console.log('Controller:', contracts.BaseController);
+        console.log('Network:', networkName, `(Chain ID: ${currentChainId})`);
+
         toast.info(`Step 1/2: Making commitment...`);
         setRegistrationStep('committing');
 
         // Save the secret BEFORE making the transaction
         setCommitmentSecret(secret);
+        console.log('✅ Secret saved to state');
 
         // Compute commitment hash using abi.encode to match the contract
         // The contract does: keccak256(abi.encode(Registration struct))
         // Registration struct: (label, owner, duration, secret, resolver, data, reverseRecord, referrer)
-        const commitment = keccak256(
-          encodeAbiParameters(
+        const encodedData = encodeAbiParameters(
             [
               { name: 'label', type: 'string' },
               { name: 'owner', type: 'address' },
@@ -377,8 +417,15 @@ function EnhancedDomainSearch() {
               BigInt(0), // false = 0
               `0x${'0'.repeat(64)}` as `0x${string}` // zero referrer
             ]
-          )
-        );
+          );
+
+        const commitment = keccak256(encodedData);
+
+        console.log('📝 Commitment Parameters:');
+        console.log('  - Encoded data:', encodedData);
+        console.log('  - Commitment hash:', commitment);
+        console.log('');
+        console.log('📤 Calling commit()...');
 
         writeContract({
           address: contracts.BaseController as `0x${string}`,
@@ -386,6 +433,9 @@ function EnhancedDomainSearch() {
           functionName: 'commit',
           args: [commitment],
         });
+
+        console.log('✅ commit() transaction sent to wallet');
+        console.log('═══════════════════════════════════════════════════════');
 
         toast.success('Commitment made! Wait 60 seconds then click Register again.');
         setRegistrationStep('waiting');
@@ -406,33 +456,92 @@ function EnhancedDomainSearch() {
       }
       // Step 2: Complete registration
       else if (commitmentSecret && waitTimeRemaining === 0) {
-        console.log('🔥 STEP 2 TRIGGERED!');
-        console.log('Secret:', commitmentSecret);
-        console.log('Search term:', searchTerm);
-        console.log('Address:', address);
-        console.log('Total price:', totalPrice);
+        console.log('═══════════════════════════════════════════════════════');
+        console.log('🚀 STEP 2: REGISTERING DOMAIN');
+        console.log('═══════════════════════════════════════════════════════');
+        console.log('Domain:', searchTerm);
+        console.log('Owner:', address);
+        console.log('Duration:', 365 * 24 * 60 * 60, 'seconds (1 year)');
+        console.log('Secret (from state):', commitmentSecret);
+        console.log('Resolver:', contracts.PublicResolver);
+        console.log('Controller:', contracts.BaseController);
+        console.log('Network:', networkName, `(Chain ID: ${currentChainId})`);
+        console.log('');
+        console.log('💰 Payment:');
+        console.log('  - Base price:', price[0].toString(), 'wei');
+        console.log('  - Premium:', price[1].toString(), 'wei');
+        console.log('  - Total:', totalPrice.toString(), 'wei');
+        console.log('  - Total (ETH):', Number(totalPrice) / 1e18, 'ETH');
+        console.log('');
+
+        // Recompute commitment to verify it matches
+        const encodedData = encodeAbiParameters(
+          [
+            { name: 'label', type: 'string' },
+            { name: 'owner', type: 'address' },
+            { name: 'duration', type: 'uint256' },
+            { name: 'secret', type: 'bytes32' },
+            { name: 'resolver', type: 'address' },
+            { name: 'data', type: 'bytes[]' },
+            { name: 'reverseRecord', type: 'uint256' },
+            { name: 'referrer', type: 'bytes32' }
+          ],
+          [
+            searchTerm,
+            address,
+            BigInt(365 * 24 * 60 * 60),
+            commitmentSecret,
+            contracts.PublicResolver as `0x${string}`,
+            [],
+            BigInt(0),
+            `0x${'0'.repeat(64)}` as `0x${string}`
+          ]
+        );
+        const verifyCommitment = keccak256(encodedData);
+        console.log('🔍 Commitment Verification:');
+        console.log('  - Recomputed hash:', verifyCommitment);
+        console.log('  - This should match the commitment from Step 1');
+        console.log('');
 
         toast.info(`Step 2/2: Completing registration on ${networkName}${networkType}...`);
         setRegistrationStep('registering');
 
-        console.log('Calling writeContract for register...');
-        writeContract({
-          address: contracts.BaseController as `0x${string}`,
-          abi: ABIS.BaseController,
-          functionName: 'register',
-          args: [
-            searchTerm,
-            address,
-            BigInt(365 * 24 * 60 * 60),
-            commitmentSecret, // Use the saved secret
-            contracts.PublicResolver as `0x${string}`,
-            [],
-            false, // reverseRecord: false
-            0 // ownerControlledFuses
-          ],
-          value: totalPrice
-        });
-        console.log('writeContract called!');
+        console.log('📝 Register Function Parameters:');
+        console.log('  [0] name:', searchTerm);
+        console.log('  [1] owner:', address);
+        console.log('  [2] duration:', BigInt(365 * 24 * 60 * 60).toString());
+        console.log('  [3] secret:', commitmentSecret);
+        console.log('  [4] resolver:', contracts.PublicResolver);
+        console.log('  [5] data: []');
+        console.log('  [6] reverseRecord: false');
+        console.log('  [7] ownerControlledFuses: 0');
+        console.log('  [value]:', totalPrice.toString(), 'wei');
+        console.log('');
+        console.log('📤 Calling register()...');
+
+        try {
+          writeContract({
+            address: contracts.BaseController as `0x${string}`,
+            abi: ABIS.BaseController,
+            functionName: 'register',
+            args: [
+              searchTerm,
+              address,
+              BigInt(365 * 24 * 60 * 60),
+              commitmentSecret, // Use the saved secret
+              contracts.PublicResolver as `0x${string}`,
+              [],
+              false, // reverseRecord: false
+              0 // ownerControlledFuses
+            ],
+            value: totalPrice
+          });
+          console.log('✅ register() transaction sent to wallet');
+        } catch (err) {
+          console.error('❌ Error calling writeContract:', err);
+          throw err;
+        }
+        console.log('═══════════════════════════════════════════════════════');
 
         // Don't reset state here - wait for transaction confirmation
       } else if (waitTimeRemaining > 0) {

@@ -183,14 +183,13 @@ contract BaseNamesCrossChainBridge is Ownable, ReentrancyGuard, Pausable {
 
     /**
      * @dev Verify validator signature
-     * @param requestHash The request hash
      * @param signature The signature to verify
      * @return bool True if signature is valid
      */
     function verifySignature(
-        bytes32 requestHash,
+        bytes32, /* requestHash */
         bytes calldata signature
-    ) internal view returns (bool) {
+    ) internal pure returns (bool) {
         // Simplified signature verification
         // In production, implement ECDSA signature recovery
         // and verify signer is the validator

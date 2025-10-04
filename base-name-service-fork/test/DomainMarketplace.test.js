@@ -6,12 +6,20 @@ describe("DomainMarketplace", function () {
     async function deployMarketplaceFixture() {
         const [owner, seller, buyer, bidder1, bidder2] = await ethers.getSigners();
 
-        // Deploy mock BaseRegistrar (ERC721)
+        // Deploy mock ENS registry
+        const MockENS = await ethers.getContractFactory("MockENS");
+        const ens = await MockENS.deploy();
+        const baseNode = ethers.keccak256(ethers.toUtf8Bytes("base"));
+
+        // Deploy BaseRegistrar with mock ENS
         const BaseRegistrar = await ethers.getContractFactory("BaseRegistrarImplementation");
         const registrar = await BaseRegistrar.deploy(
-            ethers.ZeroAddress, // ENS registry (not needed for tests)
-            ethers.keccak256(ethers.toUtf8Bytes("base"))
+            await ens.getAddress(),
+            baseNode
         );
+
+        // Set BaseRegistrar as owner of base node (required for 'live' modifier)
+        await ens.setOwner(baseNode, await registrar.getAddress());
 
         // Deploy Marketplace
         const Marketplace = await ethers.getContractFactory("DomainMarketplace");

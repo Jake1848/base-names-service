@@ -338,36 +338,33 @@ function EnhancedDomainSearch() {
     }
 
     try {
-      // Generate secret if we don't have one
-      if (!commitmentSecret) {
-        const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
-        setCommitmentSecret(secret);
-      }
-
-      const secret = commitmentSecret || `0x${'0'.repeat(64)}` as `0x${string}`;
       const totalPrice = price[0] + price[1];
       const networkType = currentChainId === 84532 ? ' (FREE testnet)' : '';
 
       // Step 1: Make commitment
-      if (registrationStep === 'idle' && !commitmentSecret) {
+      if (!commitmentSecret) {
+        // Generate secret for new registration
+        const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
+
         toast.info(`Step 1/2: Making commitment...`);
         setRegistrationStep('committing');
 
-        // Compute commitment hash - this is a simplified version
-        // The actual commitment includes all registration parameters
+        // Compute commitment hash
         const commitData = keccak256(
           encodePacked(
             ['string', 'address', 'uint256', 'bytes32'],
             [searchTerm, address, BigInt(365 * 24 * 60 * 60), secret]
           )
         );
-        const commitHash = commitData;
+
+        // Save the secret BEFORE making the transaction
+        setCommitmentSecret(secret);
 
         writeContract({
           address: contracts.BaseController as `0x${string}`,
           abi: ABIS.BaseController,
           functionName: 'commit',
-          args: [commitHash],
+          args: [commitData],
         });
 
         toast.success('Commitment made! Wait 60 seconds then click Register again.');
@@ -388,8 +385,8 @@ function EnhancedDomainSearch() {
         }, 1000);
       }
       // Step 2: Complete registration
-      else if (commitmentSecret && (registrationStep === 'idle' || waitTimeRemaining === 0)) {
-        toast.info(`Completing registration on ${networkName}${networkType}...`);
+      else if (commitmentSecret && waitTimeRemaining === 0) {
+        toast.info(`Step 2/2: Completing registration on ${networkName}${networkType}...`);
         setRegistrationStep('registering');
 
         writeContract({
@@ -400,7 +397,7 @@ function EnhancedDomainSearch() {
             searchTerm,
             address,
             BigInt(365 * 24 * 60 * 60),
-            secret,
+            commitmentSecret, // Use the saved secret
             contracts.PublicResolver as `0x${string}`,
             [],
             false, // reverseRecord: false
@@ -414,7 +411,7 @@ function EnhancedDomainSearch() {
         setCommitmentSecret(null);
         setWaitTimeRemaining(0);
       } else if (waitTimeRemaining > 0) {
-        toast.info(`Please wait ${waitTimeRemaining} more seconds...`);
+        toast.info(`Please wait ${waitTimeRemaining} more seconds before completing registration...`);
       }
     } catch (error) {
       toast.error('Registration failed. Please try again.');

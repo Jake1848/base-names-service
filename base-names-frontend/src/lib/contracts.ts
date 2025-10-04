@@ -82,6 +82,13 @@ export const ABIS = {
   ] as const,
   BaseController: [
     {
+      name: 'commit',
+      type: 'function',
+      stateMutability: 'nonpayable',
+      inputs: [{ name: 'commitment', type: 'bytes32' }],
+      outputs: []
+    },
+    {
       name: 'register',
       type: 'function',
       stateMutability: 'payable',

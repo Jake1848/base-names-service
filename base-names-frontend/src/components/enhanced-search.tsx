@@ -170,7 +170,7 @@ export function EnhancedDomainSearch() {
           secret,
           CONTRACTS.BASE_MAINNET.contracts.PublicResolver as `0x${string}`,
           [],
-          true,
+          false,
           0
         ],
         value: totalPrice

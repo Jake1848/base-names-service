@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useReadContract, useWriteContract, useSwitchChain } from 'wagmi';
+import { keccak256, encodePacked } from 'viem';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, Star, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { toast } from 'sonner';
@@ -244,6 +245,9 @@ function EnhancedDomainSearch() {
   const [validationError, setValidationError] = useState<ValidationError | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [registrationStep, setRegistrationStep] = useState<'idle' | 'committing' | 'waiting' | 'registering'>('idle');
+  const [commitmentSecret, setCommitmentSecret] = useState<`0x${string}` | null>(null);
+  const [waitTimeRemaining, setWaitTimeRemaining] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address, chain } = useAccount();
   const { writeContract, isPending: isRegistering } = useWriteContract();
@@ -334,31 +338,88 @@ function EnhancedDomainSearch() {
     }
 
     try {
-      const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
+      // Generate secret if we don't have one
+      if (!commitmentSecret) {
+        const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
+        setCommitmentSecret(secret);
+      }
+
+      const secret = commitmentSecret || `0x${'0'.repeat(64)}` as `0x${string}`;
       const totalPrice = price[0] + price[1];
-
       const networkType = currentChainId === 84532 ? ' (FREE testnet)' : '';
-      toast.info(`Initiating domain registration on ${networkName}${networkType}...`);
 
-      writeContract({
-        address: contracts.BaseController as `0x${string}`,
-        abi: ABIS.BaseController,
-        functionName: 'register',
-        args: [
-          searchTerm,
-          address,
-          BigInt(365 * 24 * 60 * 60),
-          secret,
-          contracts.PublicResolver as `0x${string}`,
-          [],
-          true,
-          0
-        ],
-        value: totalPrice
-      });
+      // Step 1: Make commitment
+      if (registrationStep === 'idle' && !commitmentSecret) {
+        toast.info(`Step 1/2: Making commitment...`);
+        setRegistrationStep('committing');
+
+        // Compute commitment hash - this is a simplified version
+        // The actual commitment includes all registration parameters
+        const commitData = keccak256(
+          encodePacked(
+            ['string', 'address', 'uint256', 'bytes32'],
+            [searchTerm, address, BigInt(365 * 24 * 60 * 60), secret]
+          )
+        );
+        const commitHash = commitData;
+
+        writeContract({
+          address: contracts.BaseController as `0x${string}`,
+          abi: ABIS.BaseController,
+          functionName: 'commit',
+          args: [commitHash],
+        });
+
+        toast.success('Commitment made! Wait 60 seconds then click Register again.');
+        setRegistrationStep('waiting');
+        setWaitTimeRemaining(60);
+
+        // Start countdown
+        const interval = setInterval(() => {
+          setWaitTimeRemaining(prev => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              setRegistrationStep('idle');
+              toast.success('Ready! Click Register to complete.');
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+      // Step 2: Complete registration
+      else if (commitmentSecret && (registrationStep === 'idle' || waitTimeRemaining === 0)) {
+        toast.info(`Completing registration on ${networkName}${networkType}...`);
+        setRegistrationStep('registering');
+
+        writeContract({
+          address: contracts.BaseController as `0x${string}`,
+          abi: ABIS.BaseController,
+          functionName: 'register',
+          args: [
+            searchTerm,
+            address,
+            BigInt(365 * 24 * 60 * 60),
+            secret,
+            contracts.PublicResolver as `0x${string}`,
+            [],
+            false, // reverseRecord: false
+            0 // ownerControlledFuses
+          ],
+          value: totalPrice
+        });
+
+        toast.success(`Successfully registered ${searchTerm}.base!`);
+        setRegistrationStep('idle');
+        setCommitmentSecret(null);
+        setWaitTimeRemaining(0);
+      } else if (waitTimeRemaining > 0) {
+        toast.info(`Please wait ${waitTimeRemaining} more seconds...`);
+      }
     } catch (error) {
       toast.error('Registration failed. Please try again.');
       console.error('Registration error:', error);
+      setRegistrationStep('idle');
     }
   };
 

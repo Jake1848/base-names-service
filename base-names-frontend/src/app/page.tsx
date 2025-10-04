@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useReadContract, useWriteContract, useSwitchChain } from 'wagmi';
-import { keccak256, encodePacked } from 'viem';
+import { keccak256, encodePacked, encodeAbiParameters } from 'viem';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, Star, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { toast } from 'sonner';
@@ -349,22 +349,42 @@ function EnhancedDomainSearch() {
         toast.info(`Step 1/2: Making commitment...`);
         setRegistrationStep('committing');
 
-        // Compute commitment hash
-        const commitData = keccak256(
-          encodePacked(
-            ['string', 'address', 'uint256', 'bytes32'],
-            [searchTerm, address, BigInt(365 * 24 * 60 * 60), secret]
-          )
-        );
-
         // Save the secret BEFORE making the transaction
         setCommitmentSecret(secret);
+
+        // Compute commitment hash using abi.encode to match the contract
+        // The contract does: keccak256(abi.encode(Registration struct))
+        // Registration struct: (label, owner, duration, secret, resolver, data, reverseRecord, referrer)
+        const commitment = keccak256(
+          encodeAbiParameters(
+            [
+              { name: 'label', type: 'string' },
+              { name: 'owner', type: 'address' },
+              { name: 'duration', type: 'uint256' },
+              { name: 'secret', type: 'bytes32' },
+              { name: 'resolver', type: 'address' },
+              { name: 'data', type: 'bytes[]' },
+              { name: 'reverseRecord', type: 'uint256' }, // Contract uses uint256 (0 or 1)
+              { name: 'referrer', type: 'bytes32' }
+            ],
+            [
+              searchTerm,
+              address,
+              BigInt(365 * 24 * 60 * 60),
+              secret,
+              contracts.PublicResolver as `0x${string}`,
+              [],
+              BigInt(0), // false = 0
+              `0x${'0'.repeat(64)}` as `0x${string}` // zero referrer
+            ]
+          )
+        );
 
         writeContract({
           address: contracts.BaseController as `0x${string}`,
           abi: ABIS.BaseController,
           functionName: 'commit',
-          args: [commitData],
+          args: [commitment],
         });
 
         toast.success('Commitment made! Wait 60 seconds then click Register again.');
@@ -386,9 +406,16 @@ function EnhancedDomainSearch() {
       }
       // Step 2: Complete registration
       else if (commitmentSecret && waitTimeRemaining === 0) {
+        console.log('🔥 STEP 2 TRIGGERED!');
+        console.log('Secret:', commitmentSecret);
+        console.log('Search term:', searchTerm);
+        console.log('Address:', address);
+        console.log('Total price:', totalPrice);
+
         toast.info(`Step 2/2: Completing registration on ${networkName}${networkType}...`);
         setRegistrationStep('registering');
 
+        console.log('Calling writeContract for register...');
         writeContract({
           address: contracts.BaseController as `0x${string}`,
           abi: ABIS.BaseController,
@@ -405,13 +432,18 @@ function EnhancedDomainSearch() {
           ],
           value: totalPrice
         });
+        console.log('writeContract called!');
 
-        toast.success(`Successfully registered ${searchTerm}.base!`);
-        setRegistrationStep('idle');
-        setCommitmentSecret(null);
-        setWaitTimeRemaining(0);
+        // Don't reset state here - wait for transaction confirmation
       } else if (waitTimeRemaining > 0) {
+        console.log('⏳ Still waiting:', waitTimeRemaining, 'seconds');
         toast.info(`Please wait ${waitTimeRemaining} more seconds before completing registration...`);
+      } else {
+        console.log('❓ Unexpected state:', {
+          hasSecret: !!commitmentSecret,
+          waitTime: waitTimeRemaining,
+          step: registrationStep
+        });
       }
     } catch (error) {
       toast.error('Registration failed. Please try again.');

@@ -82,6 +82,22 @@ export const ABIS = {
   ] as const,
   BaseController: [
     {
+      name: 'makeCommitment',
+      type: 'function',
+      stateMutability: 'pure',
+      inputs: [
+        { name: 'label', type: 'string' },
+        { name: 'owner', type: 'address' },
+        { name: 'duration', type: 'uint256' },
+        { name: 'secret', type: 'bytes32' },
+        { name: 'resolver', type: 'address' },
+        { name: 'data', type: 'bytes[]' },
+        { name: 'reverseRecord', type: 'bool' },
+        { name: 'ownerControlledFuses', type: 'uint16' }
+      ],
+      outputs: [{ name: 'commitment', type: 'bytes32' }]
+    },
+    {
       name: 'commit',
       type: 'function',
       stateMutability: 'nonpayable',

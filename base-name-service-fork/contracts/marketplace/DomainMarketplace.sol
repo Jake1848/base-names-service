@@ -134,15 +134,16 @@ contract DomainMarketplace is ReentrancyGuard, Pausable, Ownable, IERC721Receive
         require(!listings[tokenId].active, "Already listed");
         require(!auctions[tokenId].active, "Domain in auction");
 
-        // Transfer domain to escrow
-        baseRegistrar.safeTransferFrom(msg.sender, address(this), tokenId);
-
+        // CHECKS-EFFECTS-INTERACTIONS: Update state BEFORE external call
         listings[tokenId] = Listing({
             seller: msg.sender,
             price: price,
             createdAt: block.timestamp,
             active: true
         });
+
+        // External interaction comes AFTER state changes
+        baseRegistrar.safeTransferFrom(msg.sender, address(this), tokenId);
 
         emit Listed(tokenId, msg.sender, price, block.timestamp);
     }
@@ -173,10 +174,13 @@ contract DomainMarketplace is ReentrancyGuard, Pausable, Ownable, IERC721Receive
 
         uint256 fee = (listing.price * marketplaceFee) / BASIS_POINTS;
         uint256 sellerProceeds = listing.price - fee;
-
         address seller = listing.seller;
+        uint256 excessPayment = msg.value - listing.price;
+
+        // CHECKS-EFFECTS-INTERACTIONS: Update state BEFORE external calls
         listing.active = false;
 
+        // External interactions come AFTER state changes
         // Transfer domain to buyer
         baseRegistrar.safeTransferFrom(address(this), msg.sender, tokenId);
 
@@ -185,8 +189,8 @@ contract DomainMarketplace is ReentrancyGuard, Pausable, Ownable, IERC721Receive
         require(success, "Transfer to seller failed");
 
         // Refund excess payment
-        if (msg.value > listing.price) {
-            (bool refundSuccess, ) = msg.sender.call{value: msg.value - listing.price}("");
+        if (excessPayment > 0) {
+            (bool refundSuccess, ) = msg.sender.call{value: excessPayment}("");
             require(refundSuccess, "Refund failed");
         }
 

@@ -65,10 +65,7 @@ contract DomainStaking is Ownable, ReentrancyGuard, Pausable {
         require(baseRegistrar.ownerOf(tokenId) == msg.sender, "Not domain owner");
         require(!stakes[tokenId].active, "Domain already staked");
 
-        // Transfer domain to contract
-        baseRegistrar.transferFrom(msg.sender, address(this), tokenId);
-
-        // Create stake record
+        // CHECKS-EFFECTS-INTERACTIONS: Update state BEFORE external call
         stakes[tokenId] = StakeInfo({
             tokenId: tokenId,
             owner: msg.sender,
@@ -80,6 +77,9 @@ contract DomainStaking is Ownable, ReentrancyGuard, Pausable {
 
         userStakes[msg.sender].push(tokenId);
         totalStaked++;
+
+        // External interaction comes AFTER state changes
+        baseRegistrar.transferFrom(msg.sender, address(this), tokenId);
 
         emit Staked(msg.sender, tokenId, block.timestamp);
     }
@@ -97,21 +97,34 @@ contract DomainStaking is Ownable, ReentrancyGuard, Pausable {
             "Minimum stake period not met"
         );
 
-        // Calculate and transfer pending rewards
+        // Calculate rewards amount
         uint256 rewards = _calculateRewards(tokenId);
-        if (rewards > 0) {
-            _claimRewards(tokenId, rewards);
-        }
 
-        // Mark as inactive
+        // CHECKS-EFFECTS-INTERACTIONS: Update state BEFORE external calls
         stakeInfo.active = false;
         totalStaked--;
 
-        // Return domain to owner
-        baseRegistrar.transferFrom(address(this), msg.sender, tokenId);
+        // Update claim tracking if claiming rewards
+        if (rewards > 0) {
+            stakeInfo.lastClaimAt = block.timestamp;
+            stakeInfo.accumulatedRewards += rewards;
+            totalRewardsClaimed += rewards;
+            rewardPool -= rewards;
+        }
 
         // Remove from user stakes array
         _removeUserStake(msg.sender, tokenId);
+
+        // External interactions come AFTER state changes
+        // Return domain to owner
+        baseRegistrar.transferFrom(address(this), msg.sender, tokenId);
+
+        // Transfer rewards if any
+        if (rewards > 0) {
+            (bool success, ) = payable(msg.sender).call{value: rewards}("");
+            require(success, "Reward transfer failed");
+            emit RewardsClaimed(msg.sender, rewards);
+        }
 
         emit Unstaked(msg.sender, tokenId, block.timestamp);
     }
@@ -127,8 +140,19 @@ contract DomainStaking is Ownable, ReentrancyGuard, Pausable {
 
         uint256 rewards = _calculateRewards(tokenId);
         require(rewards > 0, "No rewards to claim");
+        require(rewardPool >= rewards, "Insufficient reward pool");
 
-        _claimRewards(tokenId, rewards);
+        // CHECKS-EFFECTS-INTERACTIONS: Update state BEFORE external call
+        stakeInfo.lastClaimAt = block.timestamp;
+        stakeInfo.accumulatedRewards += rewards;
+        totalRewardsClaimed += rewards;
+        rewardPool -= rewards;
+
+        // External interaction comes AFTER state changes
+        (bool success, ) = payable(msg.sender).call{value: rewards}("");
+        require(success, "Reward transfer failed");
+
+        emit RewardsClaimed(msg.sender, rewards);
     }
 
     /**
@@ -180,26 +204,6 @@ contract DomainStaking is Ownable, ReentrancyGuard, Pausable {
         return baseReward;
     }
 
-    /**
-     * @dev Internal function to process reward claims
-     * @param tokenId The domain token ID
-     * @param amount The reward amount
-     */
-    function _claimRewards(uint256 tokenId, uint256 amount) internal {
-        StakeInfo storage stakeInfo = stakes[tokenId];
-
-        require(rewardPool >= amount, "Insufficient reward pool");
-
-        stakeInfo.lastClaimAt = block.timestamp;
-        stakeInfo.accumulatedRewards += amount;
-        totalRewardsClaimed += amount;
-        rewardPool -= amount;
-
-        (bool success, ) = payable(stakeInfo.owner).call{value: amount}("");
-        require(success, "Reward transfer failed");
-
-        emit RewardsClaimed(stakeInfo.owner, amount);
-    }
 
     /**
      * @dev Remove token ID from user's stake array

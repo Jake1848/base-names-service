@@ -7,7 +7,7 @@ import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Chec
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CONTRACTS, ABIS, PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING, labelHash } from '@/lib/contracts';
+import { CONTRACTS, ABIS, PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING, labelHash, getContractsForChain, isSupportedChain, getNetworkName } from '@/lib/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -249,24 +249,29 @@ function EnhancedDomainSearch() {
   const { writeContract, isPending: isRegistering } = useWriteContract();
   const { switchChain } = useSwitchChain();
 
+  // Get contracts for current chain
+  const currentChainId = chain?.id || 8453; // Default to Base Mainnet
+  const contracts = getContractsForChain(currentChainId);
+  const networkName = getNetworkName(currentChainId);
+
   const tokenId = searchTerm && !validationError ? labelHash(searchTerm) : null;
 
   const { data: isAvailable, error: availabilityError, isLoading: isCheckingAvailability } = useReadContract({
-    address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
+    address: contracts.BaseRegistrar as `0x${string}`,
     abi: ABIS.BaseRegistrar,
     functionName: 'available',
     args: tokenId ? [tokenId] : undefined,
     query: {
-      enabled: !!tokenId && searchTerm.length > 0 && !validationError
+      enabled: !!tokenId && searchTerm.length > 0 && !validationError && !!contracts.BaseRegistrar
     }
   });
 
   const { data: price, error: priceError, isLoading: isLoadingPrice } = useReadContract({
-    address: CONTRACTS.BASE_MAINNET.contracts.BaseController as `0x${string}`,
+    address: contracts.BaseController as `0x${string}`,
     abi: ABIS.BaseController,
     functionName: 'rentPrice',
     args: [searchTerm, BigInt(365 * 24 * 60 * 60)], // 1 year
-    query: { enabled: !!searchTerm && searchTerm.length > 0 && isAvailable === true && !validationError }
+    query: { enabled: !!searchTerm && searchTerm.length > 0 && isAvailable === true && !validationError && !!contracts.BaseController }
   });
 
   // Real-time validation with debounce
@@ -323,8 +328,8 @@ function EnhancedDomainSearch() {
       return;
     }
 
-    if (chain?.id !== 8453) {
-      toast.error('Please switch to Base network to register domains');
+    if (!isSupportedChain(chain?.id || 0)) {
+      toast.error('Please switch to Base Mainnet or Base Sepolia testnet');
       return;
     }
 
@@ -332,10 +337,11 @@ function EnhancedDomainSearch() {
       const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
       const totalPrice = price[0] + price[1];
 
-      toast.info('Initiating domain registration...');
+      const networkType = currentChainId === 84532 ? ' (FREE testnet)' : '';
+      toast.info(`Initiating domain registration on ${networkName}${networkType}...`);
 
       writeContract({
-        address: CONTRACTS.BASE_MAINNET.contracts.BaseController as `0x${string}`,
+        address: contracts.BaseController as `0x${string}`,
         abi: ABIS.BaseController,
         functionName: 'register',
         args: [
@@ -343,7 +349,7 @@ function EnhancedDomainSearch() {
           address,
           BigInt(365 * 24 * 60 * 60),
           secret,
-          CONTRACTS.BASE_MAINNET.contracts.PublicResolver as `0x${string}`,
+          contracts.PublicResolver as `0x${string}`,
           [],
           true,
           0
@@ -426,6 +432,17 @@ function EnhancedDomainSearch() {
               <CardDescription className="text-lg mt-2">
                 Find your perfect .base domain name
               </CardDescription>
+              {/* Network Badge */}
+              <div className="flex justify-center mt-3">
+                <Badge
+                  variant={currentChainId === 84532 ? "secondary" : "default"}
+                  className="text-xs px-3 py-1"
+                >
+                  {currentChainId === 84532 && <Sparkles className="h-3 w-3 mr-1" />}
+                  {networkName}
+                  {currentChainId === 84532 && " - FREE Testing"}
+                </Badge>
+              </div>
             </motion.div>
           </CardHeader>
 
@@ -661,29 +678,33 @@ function EnhancedPremiumDomainCard({ domain, index }: { domain: string; index: n
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
   const isInView = useInView(cardRef, { once: true, margin: "-100px" });
+  const { chain } = useAccount();
+  const currentChainId = chain?.id || 8453;
+  const contracts = getContractsForChain(currentChainId);
   const tokenId = labelHash(domain);
 
   const { data: isAvailable, isLoading: isLoadingAvailability, error: availabilityError } = useReadContract({
-    address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
+    address: contracts.BaseRegistrar as `0x${string}`,
     abi: ABIS.BaseRegistrar,
     functionName: 'available',
     args: [tokenId],
+    query: { enabled: !!contracts.BaseRegistrar }
   });
 
   const { data: owner, isLoading: isLoadingOwner } = useReadContract({
-    address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
+    address: contracts.BaseRegistrar as `0x${string}`,
     abi: ABIS.BaseRegistrar,
     functionName: 'ownerOf',
     args: [tokenId],
-    query: { enabled: !isAvailable && !isLoadingAvailability }
+    query: { enabled: !isAvailable && !isLoadingAvailability && !!contracts.BaseRegistrar }
   });
 
   const { data: expires, isLoading: isLoadingExpires } = useReadContract({
-    address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
+    address: contracts.BaseRegistrar as `0x${string}`,
     abi: ABIS.BaseRegistrar,
     functionName: 'nameExpires',
     args: [tokenId],
-    query: { enabled: !isAvailable && !isLoadingAvailability }
+    query: { enabled: !isAvailable && !isLoadingAvailability && !!contracts.BaseRegistrar }
   });
 
   const handleCopy = async (text: string) => {
@@ -917,7 +938,12 @@ function EnhancedPremiumDomainCard({ domain, index }: { domain: string; index: n
                     variant="outline"
                     size="sm"
                     className="w-full focus-visible:ring-2 focus-visible:ring-primary group"
-                    onClick={() => window.open(`https://basescan.org/token/${CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar}?a=${tokenId}`, '_blank')}
+                    onClick={() => {
+                      const explorerUrl = currentChainId === 84532
+                        ? `https://sepolia.basescan.org/token/${contracts.BaseRegistrar}?a=${tokenId}`
+                        : `https://basescan.org/token/${contracts.BaseRegistrar}?a=${tokenId}`;
+                      window.open(explorerUrl, '_blank');
+                    }}
                     aria-label={`View ${domain}.base on BaseScan blockchain explorer`}
                   >
                     <ExternalLink className="h-3 w-3 mr-2 group-hover:rotate-45 transition-transform duration-300" />

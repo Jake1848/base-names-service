@@ -16,11 +16,14 @@ export const CONTRACTS = {
   BASE_SEPOLIA: {
     chainId: 84532,
     contracts: {
-      ENSRegistry: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
-      BaseRegistrar: "0xB364eb42E361b923244eC9ad6A0bc57fAfDaB15b",
-      ReverseRegistrar: "0xC97018De65cDD20c6e9d264316139efA747b2E7A",
-      PublicResolver: "0x6C421ca8356886E5634B267A340102c597c2a352",
-      BasePriceOracle: "0x83eF9752EE4f706Ce1f6aa3D32fA1f9f07c2baEb"
+      ENSRegistry: "0x9396f642A4bDabE278D51Dad7b277Ba4151bFfAd",
+      BaseRegistrar: "0x69b81319958388b5133DF617Ba542FB6c9e03177",
+      ReverseRegistrar: "0xa1f10499B1D1a1c249443d82aaDA9ff7F3AE99cF",
+      PublicResolver: "0x2927556a0761d6E4A6635CBE9988747625dAe125",
+      BaseController: "0x89f676A75447604c6dE7D3887D5c43107D0E5268",
+      BasePriceOracle: "0x3B7d21d238D158eA760FFdB8A5B9A1c3091Bd8c5",
+      DomainMarketplace: "0x551Fa1F68656564410F4470162bd4b2B9B057268",
+      DomainStaking: "0x6cFdDc0CBD82bAde4fa1DD3774FC72C248b7Af44"
     }
   }
 };
@@ -167,6 +170,29 @@ export function getDomainTier(domain: string): 'premium' | 'rare' | 'standard' {
   if (domain.length === 3) return 'rare';
   if (PREMIUM_DOMAINS.includes(domain)) return 'rare';
   return 'standard';
+}
+
+// Get contracts for the current network
+export function getContractsForChain(chainId: number) {
+  if (chainId === 8453) {
+    return CONTRACTS.BASE_MAINNET.contracts;
+  } else if (chainId === 84532) {
+    return CONTRACTS.BASE_SEPOLIA.contracts;
+  }
+  // Default to mainnet
+  return CONTRACTS.BASE_MAINNET.contracts;
+}
+
+// Check if chain is supported
+export function isSupportedChain(chainId: number): boolean {
+  return chainId === 8453 || chainId === 84532;
+}
+
+// Get network name
+export function getNetworkName(chainId: number): string {
+  if (chainId === 8453) return 'Base Mainnet';
+  if (chainId === 84532) return 'Base Sepolia (Testnet)';
+  return 'Unknown Network';
 }
 
 // Utility functions

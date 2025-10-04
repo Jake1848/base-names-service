@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useReadContract, useWriteContract, useSwitchChain } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 import { keccak256, encodePacked, encodeAbiParameters } from 'viem';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, Star, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
@@ -250,7 +250,7 @@ function EnhancedDomainSearch() {
   const [waitTimeRemaining, setWaitTimeRemaining] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address, chain } = useAccount();
-  const { writeContract, isPending: isRegistering, data: txHash, error: txError, isSuccess: txSuccess } = useWriteContract();
+  const { writeContract, isPending: isRegistering, data: txHash, error: txError } = useWriteContract();
   const { switchChain } = useSwitchChain();
 
   // Log transaction results
@@ -269,18 +269,32 @@ function EnhancedDomainSearch() {
     }
   }, [txError]);
 
+  // Wait for transaction receipt
+  const { data: receipt, isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
+
   useEffect(() => {
-    if (txSuccess) {
-      console.log('✅ Transaction successful!');
-      toast.success('Transaction confirmed!');
-      if (registrationStep === 'registering') {
-        toast.success(`Successfully registered ${searchTerm}.base!`);
+    if (receipt) {
+      console.log('📜 Transaction receipt:', receipt);
+      console.log('Status:', receipt.status);
+
+      if (receipt.status === 'success') {
+        console.log('✅ Transaction SUCCEEDED!');
+        toast.success('Transaction confirmed!');
+        if (registrationStep === 'registering') {
+          toast.success(`Successfully registered ${searchTerm}.base!`);
+          setRegistrationStep('idle');
+          setCommitmentSecret(null);
+          setWaitTimeRemaining(0);
+        }
+      } else {
+        console.log('❌ Transaction REVERTED!');
+        toast.error('Transaction failed - it was reverted by the contract');
         setRegistrationStep('idle');
-        setCommitmentSecret(null);
-        setWaitTimeRemaining(0);
       }
     }
-  }, [txSuccess, registrationStep, searchTerm]);
+  }, [receipt, registrationStep, searchTerm]);
 
   // Get contracts for current chain
   const currentChainId = chain?.id || 8453; // Default to Base Mainnet

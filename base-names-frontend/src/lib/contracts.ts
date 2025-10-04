@@ -20,8 +20,8 @@ export const CONTRACTS = {
       BaseRegistrar: "0x69b81319958388b5133DF617Ba542FB6c9e03177",
       ReverseRegistrar: "0xa1f10499B1D1a1c249443d82aaDA9ff7F3AE99cF",
       PublicResolver: "0x2927556a0761d6E4A6635CBE9988747625dAe125",
-      BaseController: "0x89f676A75447604c6dE7D3887D5c43107D0E5268",
-      BasePriceOracle: "0x3B7d21d238D158eA760FFdB8A5B9A1c3091Bd8c5",
+      BaseController: "0xCD24477aFCB5D97B3B794a376d6a1De38e640564", // NEW - with cheap oracle!
+      BasePriceOracle: "0xb06803C4BBe96AA27eFB01a78C92d17ccA6106b9", // NEW - 100x cheaper!
       DomainMarketplace: "0x551Fa1F68656564410F4470162bd4b2B9B057268",
       DomainStaking: "0x6cFdDc0CBD82bAde4fa1DD3774FC72C248b7Af44"
     }

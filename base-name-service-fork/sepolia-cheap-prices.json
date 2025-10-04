@@ -1,0 +1,12 @@
+{
+  "network": "base-sepolia",
+  "timestamp": "2025-10-04T15:39:51.374Z",
+  "oldPriceOracle": "0x3B7d21d238D158eA760FFdB8A5B9A1c3091Bd8c5",
+  "newPriceOracle": "0xb06803C4BBe96AA27eFB01a78C92d17ccA6106b9",
+  "baseController": "0x89f676A75447604c6dE7D3887D5c43107D0E5268",
+  "prices": {
+    "3char": "0.005 ETH/year",
+    "4char": "0.0005 ETH/year",
+    "5+char": "0.00005 ETH/year"
+  }
+}

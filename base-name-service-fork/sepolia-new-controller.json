@@ -1,0 +1,12 @@
+{
+  "network": "base-sepolia",
+  "timestamp": "2025-10-04T15:40:58.326Z",
+  "oldController": "0x89f676A75447604c6dE7D3887D5c43107D0E5268",
+  "newController": "0xCD24477aFCB5D97B3B794a376d6a1De38e640564",
+  "cheapOracle": "0xb06803C4BBe96AA27eFB01a78C92d17ccA6106b9",
+  "testPrice": {
+    "domain": "hello",
+    "duration": "1 year",
+    "price": "0.00005 ETH"
+  }
+}

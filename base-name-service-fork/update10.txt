@@ -1,0 +1,145 @@
+# Frontend Registration Fix - FINAL UPDATE
+
+## Problem
+Transaction failures on Base Sepolia testnet with error "execution reverted"
+
+## Critical Discovery
+The deployed contract has a **DIFFERENT SIGNATURE** than expected:
+
+**Deployed Contract Signature (from BaseScan):**
+```solidity
+register(
+  string name,
+  address owner,
+  uint256 duration,
+  bytes32 secret,
+  address resolver,
+  bytes[] data,
+  bool reverseRecord,
+  uint16 ownerControlledFuses  // ← uint16, NOT bytes32 referrer + uint256 fuses
+)
+```
+
+**Method ID:** 0x74694a2b
+
+This is **8 parameters**, not 9!
+
+## Root Causes Fixed
+1. ❌ Frontend was calling register() without commit-reveal process
+2. ❌ ABI had wrong function signature (9 params instead of 8)
+3. ❌ Wrong parameter types (had referrer + fuses, should be ownerControlledFuses)
+
+## Fixes Applied
+
+### 1. Contract ABI Corrected
+**File**: `src/lib/contracts.ts`
+
+**BEFORE (WRONG - 9 parameters):**
+```typescript
+inputs: [
+  { name: 'label', type: 'string' },
+  { name: 'owner', type: 'address' },
+  { name: 'duration', type: 'uint256' },
+  { name: 'secret', type: 'bytes32' },
+  { name: 'resolver', type: 'address' },
+  { name: 'data', type: 'bytes[]' },
+  { name: 'reverseRecord', type: 'bool' },
+  { name: 'referrer', type: 'bytes32' },    // ❌ WRONG
+  { name: 'fuses', type: 'uint256' }        // ❌ WRONG
+]
+```
+
+**AFTER (CORRECT - 8 parameters):**
+```typescript
+inputs: [
+  { name: 'name', type: 'string' },
+  { name: 'owner', type: 'address' },
+  { name: 'duration', type: 'uint256' },
+  { name: 'secret', type: 'bytes32' },
+  { name: 'resolver', type: 'address' },
+  { name: 'data', type: 'bytes[]' },
+  { name: 'reverseRecord', type: 'bool' },
+  { name: 'ownerControlledFuses', type: 'uint16' }  // ✅ CORRECT
+]
+```
+
+### 2. All register() Calls Updated
+
+**Files Updated:**
+- ✅ `src/app/page.tsx` - Main registration flow
+- ✅ `src/components/enhanced-search.tsx` - Search component
+- ✅ `src/lib/test-minting.ts` - Testing utilities
+- ✅ `src/sdk/BaseNamesSDK.ts` - Already correct
+- ✅ `src/app/docs/page.tsx` - Already correct
+
+**Corrected Args:**
+```typescript
+args: [
+  searchTerm,                           // name
+  address,                              // owner
+  BigInt(365 * 24 * 60 * 60),          // duration (1 year)
+  secret,                               // secret
+  contracts.PublicResolver,             // resolver
+  [],                                   // data
+  false,                                // reverseRecord (MUST be false)
+  0                                     // ownerControlledFuses (uint16)
+]
+```
+
+### 3. Main Registration Flow
+**File**: `src/app/page.tsx`
+
+Implemented 2-step commit-reveal process:
+- Step 1: Compute commitment hash and call commit()
+- Wait 60 seconds with countdown timer
+- Step 2: Call register() with correct 8 parameters
+
+State management added:
+- registrationStep: 'idle' | 'committing' | 'waiting' | 'registering'
+- commitmentSecret: generated random bytes32
+- waitTimeRemaining: countdown timer
+
+## Build Status
+✅ **BUILD SUCCESSFUL** - No TypeScript errors
+- All ABIs match deployed contracts
+- All parameter types correct
+- Only minor linting warnings (unused imports)
+
+## Contract Authorizations (Already Configured)
+1. ✅ RegistrationLimiter.setController(0xCD24477aFCB5D97B3B794a376d6a1De38e640564)
+2. ✅ reverseRecord set to false (ReverseRegistrar not authorized)
+
+## Testing Scripts
+Working script: `scripts/simple-register.js`
+- ✅ Successfully registered test999.base
+- TX: 0x5cda65f55a82de1430d8272b11c32203d988ab967ebc380b6dbfa2c9c7310cd2
+- Cost: 0.00005 ETH (100x cheaper than mainnet)
+
+## Next Steps
+1. ✅ Build completed successfully
+2. 🔄 Test registration flow in browser (pending)
+3. 🔄 Verify end-to-end on Base Sepolia
+
+## Transaction Reference
+**Failed Transaction (for comparison):**
+- Hash: 0x0acdc12f37b06eccbecd6e076c6794a0da222d083956eaabe7fd5d57364816c3
+- Error: execution reverted
+- Reason: Wrong function signature / missing commitment
+
+**Working Transaction (from script):**
+- Hash: 0x5cda65f55a82de1430d8272b11c32203d988ab967ebc380b6dbfa2c9c7310cd2
+- Status: ✅ Success
+- Domain: test999.base
+
+## Contract Addresses (Base Sepolia)
+- BaseController: 0xCD24477aFCB5D97B3B794a376d6a1De38e640564
+- BaseRegistrar: 0x69b81319958388b5133DF617Ba542FB6c9e03177
+- PublicResolver: 0x2927556a0761d6E4A6635CBE9988747625dAe125
+- BasePriceOracle: 0xb06803C4BBe96AA27eFB01a78C92d17ccA6106b9 (100x cheaper!)
+
+## Key Changes Summary
+1. ✅ ABI function signature corrected (8 params, not 9)
+2. ✅ Last parameter is uint16 ownerControlledFuses (not bytes32 + uint256)
+3. ✅ All register() calls updated across codebase
+4. ✅ Build successful with no errors
+5. ✅ Ready for browser testing

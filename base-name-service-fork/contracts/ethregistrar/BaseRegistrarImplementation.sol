@@ -93,6 +93,11 @@ contract BaseRegistrarImplementation is ERC721, IBaseRegistrar, Ownable {
         return controllers[controller];
     }
 
+    // Approve an operator in the ENS Registry to act on behalf of this registrar
+    function approveOperatorInENS(address operator, bool approved) external onlyOwner {
+        ens.setApprovalForAll(operator, approved);
+    }
+
     // Set the resolver for the TLD this registrar manages.
     function setResolver(address resolver) external override onlyOwner {
         ens.setResolver(baseNode, resolver);

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useReadContract, useWriteContract, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 import { keccak256, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, Star, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { toast } from 'sonner';
@@ -500,7 +500,7 @@ function EnhancedDomainSearch() {
 
         // Call the contract's makeCommitment function to get the CORRECT hash
         const publicClient = createPublicClient({
-          chain: baseSepolia,
+          chain: currentChainId === 84532 ? baseSepolia : base,
           transport: http()
         });
 
@@ -600,7 +600,7 @@ function EnhancedDomainSearch() {
 
         // Recompute commitment using the contract's makeCommitment function
         const publicClient = createPublicClient({
-          chain: baseSepolia,
+          chain: currentChainId === 84532 ? baseSepolia : base,
           transport: http()
         });
 

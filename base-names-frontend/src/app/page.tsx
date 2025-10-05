@@ -705,8 +705,8 @@ function EnhancedDomainSearch() {
         } catch (err) {
           console.error('');
           console.error('❌ Error calling writeContract:');
-          console.error('  Error type:', err?.constructor?.name);
-          console.error('  Error message:', err?.message);
+          console.error('  Error type:', (err as Error)?.constructor?.name);
+          console.error('  Error message:', (err as Error)?.message);
           console.error('  Full error:', err);
           throw err;
         }

@@ -109,14 +109,15 @@ export const ABIS = {
       type: 'function',
       stateMutability: 'payable',
       inputs: [
-        { name: 'name', type: 'string' },
+        { name: 'label', type: 'string' },
         { name: 'owner', type: 'address' },
         { name: 'duration', type: 'uint256' },
         { name: 'secret', type: 'bytes32' },
         { name: 'resolver', type: 'address' },
         { name: 'data', type: 'bytes[]' },
         { name: 'reverseRecord', type: 'bool' },
-        { name: 'ownerControlledFuses', type: 'uint16' }
+        { name: 'referrer', type: 'bytes32' },
+        { name: 'fuses', type: 'uint256' }
       ],
       outputs: []
     },

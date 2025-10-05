@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useReadContract, useWriteContract, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
-import { keccak256, encodePacked, encodeAbiParameters } from 'viem';
+import { keccak256, encodePacked, encodeAbiParameters, createPublicClient, http } from 'viem';
+import { baseSepolia } from 'viem/chains';
 import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, Star, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { toast } from 'sonner';
@@ -497,40 +498,33 @@ function EnhancedDomainSearch() {
         console.log('✅ Secret saved to state:', secret);
         console.log('✅ State updated, registration step: committing');
 
-        // Compute commitment hash using abi.encode to match the contract
-        // The contract does: keccak256(abi.encode(Registration struct))
-        // Registration struct: (label, owner, duration, secret, resolver, data, reverseRecord, referrer, fuses)
-        const encodedData = encodeAbiParameters(
-            [
-              { name: 'label', type: 'string' },
-              { name: 'owner', type: 'address' },
-              { name: 'duration', type: 'uint256' },
-              { name: 'secret', type: 'bytes32' },
-              { name: 'resolver', type: 'address' },
-              { name: 'data', type: 'bytes[]' },
-              { name: 'reverseRecord', type: 'bool' },
-              { name: 'referrer', type: 'bytes32' },
-              { name: 'fuses', type: 'uint256' }
-            ],
-            [
-              searchTerm,
-              address,
-              BigInt(365 * 24 * 60 * 60),
-              secret,
-              `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER
-              [],
-              false, // reverseRecord
-              `0x${'0'.repeat(64)}` as `0x${string}`, // zero referrer
-              BigInt(0) // zero fuses
-            ]
-          );
+        // Call the contract's makeCommitment function to get the CORRECT hash
+        const publicClient = createPublicClient({
+          chain: baseSepolia,
+          transport: http()
+        });
 
-        const commitment = keccak256(encodedData);
+        const commitment = await publicClient.readContract({
+          address: contracts.BaseController as `0x${string}`,
+          abi: ABIS.BaseController,
+          functionName: 'makeCommitment',
+          args: [
+            searchTerm,                                  // label
+            address,                                     // owner
+            BigInt(365 * 24 * 60 * 60),                 // duration
+            secret,                                      // secret
+            `0x${'0'.repeat(40)}` as `0x${string}`,     // resolver (zero address)
+            [],                                          // data
+            false,                                       // reverseRecord
+            `0x${'0'.repeat(64)}` as `0x${string}`,     // referrer (zero bytes32)
+            BigInt(0)                                    // fuses
+          ]
+        }) as `0x${string}`;
 
         console.log('');
         console.log('📝 Commitment Calculation:');
-        console.log('  - Method: keccak256(abi.encode(...))');
-        console.log('  - Parameters encoded:');
+        console.log('  - Method: Contract.makeCommitment() [CORRECT METHOD]');
+        console.log('  - Parameters:');
         console.log('    [0] label:', searchTerm);
         console.log('    [1] owner:', address);
         console.log('    [2] duration:', 365 * 24 * 60 * 60);
@@ -540,9 +534,7 @@ function EnhancedDomainSearch() {
         console.log('    [6] reverseRecord:', false);
         console.log('    [7] referrer:', '0x0000000000000000000000000000000000000000000000000000000000000000');
         console.log('    [8] fuses:', 0);
-        console.log('  - Encoded data length:', encodedData.length, 'bytes');
-        console.log('  - Encoded data:', encodedData);
-        console.log('  - Commitment hash:', commitment);
+        console.log('  - Commitment hash (from contract):', commitment);
         console.log('');
         console.log('📤 Sending commit() transaction...');
         console.log('  - To contract:', contracts.BaseController);
@@ -606,35 +598,32 @@ function EnhancedDomainSearch() {
         console.log('  - Total (ETH):', Number(totalPrice) / 1e18, 'ETH');
         console.log('');
 
-        // Recompute commitment to verify it matches
-        const encodedData = encodeAbiParameters(
-          [
-            { name: 'label', type: 'string' },
-            { name: 'owner', type: 'address' },
-            { name: 'duration', type: 'uint256' },
-            { name: 'secret', type: 'bytes32' },
-            { name: 'resolver', type: 'address' },
-            { name: 'data', type: 'bytes[]' },
-            { name: 'reverseRecord', type: 'bool' },
-            { name: 'referrer', type: 'bytes32' },
-            { name: 'fuses', type: 'uint256' }
-          ],
-          [
+        // Recompute commitment using the contract's makeCommitment function
+        const publicClient = createPublicClient({
+          chain: baseSepolia,
+          transport: http()
+        });
+
+        const verifyCommitment = await publicClient.readContract({
+          address: contracts.BaseController as `0x${string}`,
+          abi: ABIS.BaseController,
+          functionName: 'makeCommitment',
+          args: [
             searchTerm,
             address,
             BigInt(365 * 24 * 60 * 60),
             commitmentSecret,
-            `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER - avoids ens.setRecord() call
+            `0x${'0'.repeat(40)}` as `0x${string}`,
             [],
             false,
             `0x${'0'.repeat(64)}` as `0x${string}`,
             BigInt(0)
           ]
-        );
-        const verifyCommitment = keccak256(encodedData);
+        }) as `0x${string}`;
+
         console.log('🔍 Commitment Verification:');
+        console.log('  - Method: Contract.makeCommitment() [CORRECT METHOD]');
         console.log('  - Recomputed hash:', verifyCommitment);
-        console.log('  - Encoded data:', encodedData);
         console.log('  - Parameters used:');
         console.log('    [0] label:', searchTerm);
         console.log('    [1] owner:', address);

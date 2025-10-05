@@ -93,7 +93,8 @@ export const ABIS = {
         { name: 'resolver', type: 'address' },
         { name: 'data', type: 'bytes[]' },
         { name: 'reverseRecord', type: 'bool' },
-        { name: 'ownerControlledFuses', type: 'uint16' }
+        { name: 'referrer', type: 'bytes32' },
+        { name: 'fuses', type: 'uint256' }
       ],
       outputs: [{ name: 'commitment', type: 'bytes32' }]
     },

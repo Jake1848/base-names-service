@@ -499,7 +499,7 @@ function EnhancedDomainSearch() {
 
         // Compute commitment hash using abi.encode to match the contract
         // The contract does: keccak256(abi.encode(Registration struct))
-        // Registration struct: (label, owner, duration, secret, resolver, data, reverseRecord, referrer)
+        // Registration struct: (label, owner, duration, secret, resolver, data, reverseRecord, referrer, fuses)
         const encodedData = encodeAbiParameters(
             [
               { name: 'label', type: 'string' },
@@ -508,8 +508,9 @@ function EnhancedDomainSearch() {
               { name: 'secret', type: 'bytes32' },
               { name: 'resolver', type: 'address' },
               { name: 'data', type: 'bytes[]' },
-              { name: 'reverseRecord', type: 'uint256' }, // Contract uses uint256 (0 or 1)
-              { name: 'referrer', type: 'bytes32' }
+              { name: 'reverseRecord', type: 'bool' },
+              { name: 'referrer', type: 'bytes32' },
+              { name: 'fuses', type: 'uint256' }
             ],
             [
               searchTerm,
@@ -518,8 +519,9 @@ function EnhancedDomainSearch() {
               secret,
               `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER
               [],
-              BigInt(0), // false = 0
-              `0x${'0'.repeat(64)}` as `0x${string}` // zero referrer
+              false, // reverseRecord
+              `0x${'0'.repeat(64)}` as `0x${string}`, // zero referrer
+              BigInt(0) // zero fuses
             ]
           );
 
@@ -535,8 +537,9 @@ function EnhancedDomainSearch() {
         console.log('    [3] secret:', secret);
         console.log('    [4] resolver:', '0x0000000000000000000000000000000000000000');
         console.log('    [5] data:', '[]');
-        console.log('    [6] reverseRecord:', 0);
+        console.log('    [6] reverseRecord:', false);
         console.log('    [7] referrer:', '0x0000000000000000000000000000000000000000000000000000000000000000');
+        console.log('    [8] fuses:', 0);
         console.log('  - Encoded data length:', encodedData.length, 'bytes');
         console.log('  - Encoded data:', encodedData);
         console.log('  - Commitment hash:', commitment);
@@ -612,8 +615,9 @@ function EnhancedDomainSearch() {
             { name: 'secret', type: 'bytes32' },
             { name: 'resolver', type: 'address' },
             { name: 'data', type: 'bytes[]' },
-            { name: 'reverseRecord', type: 'uint256' },
-            { name: 'referrer', type: 'bytes32' }
+            { name: 'reverseRecord', type: 'bool' },
+            { name: 'referrer', type: 'bytes32' },
+            { name: 'fuses', type: 'uint256' }
           ],
           [
             searchTerm,
@@ -622,8 +626,9 @@ function EnhancedDomainSearch() {
             commitmentSecret,
             `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER - avoids ens.setRecord() call
             [],
-            BigInt(0),
-            `0x${'0'.repeat(64)}` as `0x${string}`
+            false,
+            `0x${'0'.repeat(64)}` as `0x${string}`,
+            BigInt(0)
           ]
         );
         const verifyCommitment = keccak256(encodedData);
@@ -637,8 +642,9 @@ function EnhancedDomainSearch() {
         console.log('    [3] secret:', commitmentSecret);
         console.log('    [4] resolver:', '0x0000000000000000000000000000000000000000');
         console.log('    [5] data:', '[]');
-        console.log('    [6] reverseRecord:', 0);
+        console.log('    [6] reverseRecord:', false);
         console.log('    [7] referrer:', '0x0000000000000000000000000000000000000000000000000000000000000000');
+        console.log('    [8] fuses:', 0);
         console.log('  ✅ This hash MUST match the one from Step 1!');
         console.log('');
 

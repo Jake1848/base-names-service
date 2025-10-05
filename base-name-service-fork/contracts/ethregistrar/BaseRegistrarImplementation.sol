@@ -98,6 +98,11 @@ contract BaseRegistrarImplementation is ERC721, IBaseRegistrar, Ownable {
         ens.setApprovalForAll(operator, approved);
     }
 
+    // Transfer ownership of the base node to a new owner (for contract migrations)
+    function transferBaseNodeOwnership(address newOwner) external onlyOwner {
+        ens.setOwner(baseNode, newOwner);
+    }
+
     // Set the resolver for the TLD this registrar manages.
     function setResolver(address resolver) external override onlyOwner {
         ens.setResolver(baseNode, resolver);

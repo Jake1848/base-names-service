@@ -679,7 +679,7 @@ function EnhancedDomainSearch() {
               [],
               false, // reverseRecord: false
               `0x${'0'.repeat(64)}` as `0x${string}`, // referrer: zero bytes32
-              0n // fuses: 0
+              BigInt(0) // fuses: 0
             ],
             value: totalPrice
           });

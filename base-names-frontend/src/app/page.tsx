@@ -426,7 +426,7 @@ function EnhancedDomainSearch() {
               address,
               BigInt(365 * 24 * 60 * 60),
               secret,
-              contracts.PublicResolver as `0x${string}`,
+              `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER
               [],
               BigInt(0), // false = 0
               `0x${'0'.repeat(64)}` as `0x${string}` // zero referrer

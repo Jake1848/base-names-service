@@ -81,7 +81,8 @@ export async function testMintingProcess(domainName: string, userAddress: string
         resolver: CONTRACTS.BASE_MAINNET.contracts.PublicResolver,
         data: [], // No additional data
         reverseRecord: true, // Set reverse record
-        ownerControlledFuses: 0, // No fuses
+        referrer: `0x${'0'.repeat(64)}` as `0x${string}`, // No referrer
+        fuses: BigInt(0), // No fuses
       };
 
       console.log('📝 Function: register()');
@@ -128,7 +129,8 @@ export async function testMintingProcess(domainName: string, userAddress: string
             registerParams.resolver as `0x${string}`,
             registerParams.data,
             registerParams.reverseRecord,
-            registerParams.ownerControlledFuses,
+            registerParams.referrer,
+            registerParams.fuses,
           ],
           value: totalPrice,
           account: userAddress as `0x${string}`,

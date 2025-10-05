@@ -256,14 +256,46 @@ function EnhancedDomainSearch() {
   // Log transaction results
   useEffect(() => {
     if (txHash) {
-      console.log('📝 Transaction hash received:', txHash);
+      console.log('');
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('📝 TRANSACTION HASH RECEIVED');
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('Timestamp:', new Date().toISOString());
+      console.log('Transaction hash:', txHash);
+      console.log('Short hash:', txHash.slice(0, 10) + '...');
+      console.log('');
+      console.log('✅ User signed the transaction!');
+      console.log('✅ Transaction broadcast to Base Sepolia network');
+      console.log('⏳ Waiting for transaction to be included in a block...');
+      console.log('');
+      console.log('View on BaseScan:');
+      console.log(`https://sepolia.basescan.org/tx/${txHash}`);
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('');
       toast.info(`Transaction submitted: ${txHash.slice(0, 10)}...`);
     }
   }, [txHash]);
 
   useEffect(() => {
     if (txError) {
-      console.error('❌ Transaction error:', txError);
+      console.log('');
+      console.log('═══════════════════════════════════════════════════════');
+      console.error('❌ TRANSACTION ERROR (User Rejected or Wallet Error)');
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('Timestamp:', new Date().toISOString());
+      console.error('Error type:', txError?.constructor?.name);
+      console.error('Error name:', txError?.name);
+      console.error('Error message:', txError?.message);
+      console.error('');
+      console.error('Common causes:');
+      console.error('  - User rejected transaction in wallet');
+      console.error('  - Insufficient ETH for gas');
+      console.error('  - Network connection issue');
+      console.error('  - Wallet locked or disconnected');
+      console.error('');
+      console.error('Full error object:', txError);
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('');
       toast.error(`Transaction failed: ${txError.message}`);
       setRegistrationStep('idle');
     }
@@ -276,23 +308,73 @@ function EnhancedDomainSearch() {
 
   useEffect(() => {
     if (receipt) {
-      console.log('📜 Transaction receipt:', receipt);
+      console.log('');
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('📜 TRANSACTION RECEIPT RECEIVED');
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('Timestamp:', new Date().toISOString());
+      console.log('Transaction hash:', receipt.transactionHash);
+      console.log('Block number:', receipt.blockNumber?.toString());
+      console.log('Block hash:', receipt.blockHash);
+      console.log('From:', receipt.from);
+      console.log('To:', receipt.to);
+      console.log('Gas used:', receipt.gasUsed?.toString());
+      console.log('Effective gas price:', receipt.effectiveGasPrice?.toString());
       console.log('Status:', receipt.status);
+      console.log('');
 
       if (receipt.status === 'success') {
-        console.log('✅ Transaction SUCCEEDED!');
+        console.log('🎉 Transaction SUCCEEDED!');
+        console.log('');
+        console.log('Receipt details:');
+        console.log('  - Contract address:', receipt.contractAddress || 'N/A');
+        console.log('  - Cumulative gas used:', receipt.cumulativeGasUsed?.toString());
+        console.log('  - Logs count:', receipt.logs?.length || 0);
+        if (receipt.logs && receipt.logs.length > 0) {
+          console.log('');
+          console.log('📋 Event logs:');
+          receipt.logs.forEach((log, index) => {
+            console.log(`  Log ${index}:`, {
+              address: log.address,
+              topics: log.topics,
+              data: log.data
+            });
+          });
+        }
+        console.log('');
+
         toast.success('Transaction confirmed!');
         if (registrationStep === 'registering') {
+          console.log('✅✅✅ DOMAIN SUCCESSFULLY REGISTERED! ✅✅✅');
+          console.log(`Domain: ${searchTerm}.base`);
+          console.log('Owner:', receipt.from);
           toast.success(`Successfully registered ${searchTerm}.base!`);
           setRegistrationStep('idle');
           setCommitmentSecret(null);
           setWaitTimeRemaining(0);
+        } else if (registrationStep === 'committing') {
+          console.log('✅ COMMITMENT SAVED ON-CHAIN');
+          console.log('Wait 60 seconds before completing registration');
         }
       } else {
-        console.log('❌ Transaction REVERTED!');
+        console.log('❌❌❌ TRANSACTION REVERTED! ❌❌❌');
+        console.log('');
+        console.log('This means the contract rejected the transaction.');
+        console.log('Possible reasons:');
+        console.log('  - Commitment not found (hash mismatch)');
+        console.log('  - Commitment too new (< 60 seconds)');
+        console.log('  - Commitment too old (> 24 hours)');
+        console.log('  - Domain not available');
+        console.log('  - Insufficient payment');
+        console.log('  - Rate limit exceeded');
+        console.log('');
+        console.log('Check the transaction on BaseScan for details:');
+        console.log(`https://sepolia.basescan.org/tx/${receipt.transactionHash}`);
         toast.error('Transaction failed - it was reverted by the contract');
         setRegistrationStep('idle');
       }
+      console.log('═══════════════════════════════════════════════════════');
+      console.log('');
     }
   }, [receipt, registrationStep, searchTerm]);
 
@@ -392,20 +474,28 @@ function EnhancedDomainSearch() {
         console.log('═══════════════════════════════════════════════════════');
         console.log('🔐 STEP 1: MAKING COMMITMENT');
         console.log('═══════════════════════════════════════════════════════');
+        console.log('Timestamp:', new Date().toISOString());
         console.log('Domain:', searchTerm);
         console.log('Owner:', address);
         console.log('Duration:', 365 * 24 * 60 * 60, 'seconds (1 year)');
         console.log('Secret:', secret);
-        console.log('Resolver:', contracts.PublicResolver);
+        console.log('Resolver:', '0x0000000000000000000000000000000000000000 (ZERO ADDRESS - bypasses ENS approval issue)');
         console.log('Controller:', contracts.BaseController);
+        console.log('Registrar:', contracts.BaseRegistrar);
+        console.log('ENS Registry:', contracts.ENSRegistry);
         console.log('Network:', networkName, `(Chain ID: ${currentChainId})`);
+        console.log('');
+        console.log('💡 Strategy: Register without resolver to avoid ens.setRecord() call');
+        console.log('   that requires ENS Registry approval.');
 
         toast.info(`Step 1/2: Making commitment...`);
         setRegistrationStep('committing');
 
         // Save the secret BEFORE making the transaction
         setCommitmentSecret(secret);
-        console.log('✅ Secret saved to state');
+        console.log('');
+        console.log('✅ Secret saved to state:', secret);
+        console.log('✅ State updated, registration step: committing');
 
         // Compute commitment hash using abi.encode to match the contract
         // The contract does: keccak256(abi.encode(Registration struct))
@@ -435,11 +525,26 @@ function EnhancedDomainSearch() {
 
         const commitment = keccak256(encodedData);
 
-        console.log('📝 Commitment Parameters:');
+        console.log('');
+        console.log('📝 Commitment Calculation:');
+        console.log('  - Method: keccak256(abi.encode(...))');
+        console.log('  - Parameters encoded:');
+        console.log('    [0] label:', searchTerm);
+        console.log('    [1] owner:', address);
+        console.log('    [2] duration:', 365 * 24 * 60 * 60);
+        console.log('    [3] secret:', secret);
+        console.log('    [4] resolver:', '0x0000000000000000000000000000000000000000');
+        console.log('    [5] data:', '[]');
+        console.log('    [6] reverseRecord:', 0);
+        console.log('    [7] referrer:', '0x0000000000000000000000000000000000000000000000000000000000000000');
+        console.log('  - Encoded data length:', encodedData.length, 'bytes');
         console.log('  - Encoded data:', encodedData);
         console.log('  - Commitment hash:', commitment);
         console.log('');
-        console.log('📤 Calling commit()...');
+        console.log('📤 Sending commit() transaction...');
+        console.log('  - To contract:', contracts.BaseController);
+        console.log('  - Function: commit(bytes32)');
+        console.log('  - Args: [', commitment, ']');
 
         writeContract({
           address: contracts.BaseController as `0x${string}`,
@@ -448,7 +553,9 @@ function EnhancedDomainSearch() {
           args: [commitment],
         });
 
-        console.log('✅ commit() transaction sent to wallet');
+        console.log('');
+        console.log('✅ commit() transaction sent to wallet for signing');
+        console.log('⏳ Waiting for user to approve transaction in wallet...');
         console.log('═══════════════════════════════════════════════════════');
 
         toast.success('Commitment made! Wait 60 seconds then click Register again.');
@@ -473,17 +580,25 @@ function EnhancedDomainSearch() {
         console.log('═══════════════════════════════════════════════════════');
         console.log('🚀 STEP 2: REGISTERING DOMAIN');
         console.log('═══════════════════════════════════════════════════════');
+        console.log('Timestamp:', new Date().toISOString());
         console.log('Domain:', searchTerm);
         console.log('Owner:', address);
         console.log('Duration:', 365 * 24 * 60 * 60, 'seconds (1 year)');
         console.log('Secret (from state):', commitmentSecret);
-        console.log('Resolver:', contracts.PublicResolver);
+        console.log('Resolver:', '0x0000000000000000000000000000000000000000 (ZERO ADDRESS)');
         console.log('Controller:', contracts.BaseController);
+        console.log('Registrar:', contracts.BaseRegistrar);
+        console.log('ENS Registry:', contracts.ENSRegistry);
         console.log('Network:', networkName, `(Chain ID: ${currentChainId})`);
+        console.log('');
+        console.log('💡 Using zero address resolver to bypass ens.setRecord()');
+        console.log('   This avoids the ENS Registry approval requirement.');
         console.log('');
         console.log('💰 Payment:');
         console.log('  - Base price:', price[0].toString(), 'wei');
+        console.log('  - Base price (ETH):', Number(price[0]) / 1e18, 'ETH');
         console.log('  - Premium:', price[1].toString(), 'wei');
+        console.log('  - Premium (ETH):', Number(price[1]) / 1e18, 'ETH');
         console.log('  - Total:', totalPrice.toString(), 'wei');
         console.log('  - Total (ETH):', Number(totalPrice) / 1e18, 'ETH');
         console.log('');
@@ -514,24 +629,40 @@ function EnhancedDomainSearch() {
         const verifyCommitment = keccak256(encodedData);
         console.log('🔍 Commitment Verification:');
         console.log('  - Recomputed hash:', verifyCommitment);
-        console.log('  - This should match the commitment from Step 1');
+        console.log('  - Encoded data:', encodedData);
+        console.log('  - Parameters used:');
+        console.log('    [0] label:', searchTerm);
+        console.log('    [1] owner:', address);
+        console.log('    [2] duration:', 365 * 24 * 60 * 60);
+        console.log('    [3] secret:', commitmentSecret);
+        console.log('    [4] resolver:', '0x0000000000000000000000000000000000000000');
+        console.log('    [5] data:', '[]');
+        console.log('    [6] reverseRecord:', 0);
+        console.log('    [7] referrer:', '0x0000000000000000000000000000000000000000000000000000000000000000');
+        console.log('  ✅ This hash MUST match the one from Step 1!');
         console.log('');
 
         toast.info(`Step 2/2: Completing registration on ${networkName}${networkType}...`);
         setRegistrationStep('registering');
 
-        console.log('📝 Register Function Parameters:');
-        console.log('  [0] name:', searchTerm);
-        console.log('  [1] owner:', address);
-        console.log('  [2] duration:', BigInt(365 * 24 * 60 * 60).toString());
-        console.log('  [3] secret:', commitmentSecret);
-        console.log('  [4] resolver:', '0x0000000000000000000000000000000000000000 (NO RESOLVER)');
-        console.log('  [5] data: []');
-        console.log('  [6] reverseRecord: false');
-        console.log('  [7] ownerControlledFuses: 0');
-        console.log('  [value]:', totalPrice.toString(), 'wei');
+        console.log('📝 register() Function Call Details:');
+        console.log('  - Contract address:', contracts.BaseController);
+        console.log('  - Function: register(string,address,uint256,bytes32,address,bytes[],bool,uint16)');
+        console.log('  - Method ID: 0x74694a2b');
         console.log('');
-        console.log('📤 Calling register()...');
+        console.log('  Parameters:');
+        console.log('  [0] name (string):', searchTerm);
+        console.log('  [1] owner (address):', address);
+        console.log('  [2] duration (uint256):', BigInt(365 * 24 * 60 * 60).toString());
+        console.log('  [3] secret (bytes32):', commitmentSecret);
+        console.log('  [4] resolver (address):', '0x0000000000000000000000000000000000000000');
+        console.log('  [5] data (bytes[]):', '[]');
+        console.log('  [6] reverseRecord (bool):', false);
+        console.log('  [7] ownerControlledFuses (uint16):', 0);
+        console.log('');
+        console.log('  Payment (msg.value):', totalPrice.toString(), 'wei (', Number(totalPrice) / 1e18, 'ETH)');
+        console.log('');
+        console.log('📤 Sending register() transaction to wallet...');
 
         try {
           writeContract({
@@ -550,11 +681,34 @@ function EnhancedDomainSearch() {
             ],
             value: totalPrice
           });
-          console.log('✅ register() transaction sent to wallet');
+          console.log('');
+          console.log('✅ register() transaction sent to wallet for signing');
+          console.log('⏳ Waiting for user to approve transaction in wallet...');
+          console.log('');
+          console.log('🔬 What happens on-chain:');
+          console.log('  1. User signs transaction in wallet');
+          console.log('  2. Transaction broadcasts to Base Sepolia network');
+          console.log('  3. Sequencer includes transaction in block');
+          console.log('  4. Controller verifies:');
+          console.log('     - Commitment exists');
+          console.log('     - Commitment age >= 60 seconds');
+          console.log('     - Commitment age <= 86400 seconds');
+          console.log('     - Domain is available');
+          console.log('     - Payment >= price');
+          console.log('  5. Controller calls BaseRegistrar.register()');
+          console.log('  6. BaseRegistrar mints NFT to owner');
+          console.log('  7. BaseRegistrar calls ens.setSubnodeOwner()');
+          console.log('  8. Since resolver = 0x0, ens.setRecord() is SKIPPED');
+          console.log('  9. Transaction completes ✅');
         } catch (err) {
-          console.error('❌ Error calling writeContract:', err);
+          console.error('');
+          console.error('❌ Error calling writeContract:');
+          console.error('  Error type:', err?.constructor?.name);
+          console.error('  Error message:', err?.message);
+          console.error('  Full error:', err);
           throw err;
         }
+        console.log('');
         console.log('═══════════════════════════════════════════════════════');
 
         // Don't reset state here - wait for transaction confirmation

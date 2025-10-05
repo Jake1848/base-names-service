@@ -171,7 +171,8 @@ export function EnhancedDomainSearch() {
           CONTRACTS.BASE_MAINNET.contracts.PublicResolver as `0x${string}`,
           [],
           false,
-          0
+          `0x${'0'.repeat(64)}` as `0x${string}`, // referrer: zero bytes32
+          BigInt(0) // fuses: 0
         ],
         value: totalPrice
       });

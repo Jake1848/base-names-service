@@ -6,7 +6,7 @@ export const CONTRACTS = {
     chainId: 8453,
     contracts: {
       ENSRegistry: "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E",
-      BaseRegistrar: "0xD158de26c787ABD1E0f2955C442fea9d4DC0a917",
+      BaseRegistrar: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00", // V2 with metadata
       BaseController: "0xca7FD90f4C76FbCdbdBB3427804374b16058F55e",
       PublicResolver: "0x5D5bC53bDa5105561371FEf50B50E03aA94c962E",
       ReverseRegistrar: "0xD982f3bFf21dCb9421ffBC2000Cfe3C94A01c889",
@@ -16,11 +16,11 @@ export const CONTRACTS = {
   BASE_SEPOLIA: {
     chainId: 84532,
     contracts: {
-      ENSRegistry: "0x9396f642A4bDabE278D51Dad7b277Ba4151bFfAd",
-      BaseRegistrar: "0x69b81319958388b5133DF617Ba542FB6c9e03177", // Back to old - can't transfer .base ownership
+      ENSRegistry: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
+      BaseRegistrar: "0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9", // V2 with metadata
       ReverseRegistrar: "0xa1f10499B1D1a1c249443d82aaDA9ff7F3AE99cF",
       PublicResolver: "0x2927556a0761d6E4A6635CBE9988747625dAe125",
-      BaseController: "0xCD24477aFCB5D97B3B794a376d6a1De38e640564", // Back to old controller
+      BaseController: "0xCD24477aFCB5D97B3B794a376d6a1De38e640564",
       BasePriceOracle: "0x3B7d21d238D158eA760FFdB8A5B9A1c3091Bd8c5",
       DomainMarketplace: "0x551Fa1F68656564410F4470162bd4b2B9B057268",
       DomainStaking: "0x6cFdDc0CBD82bAde4fa1DD3774FC72C248b7Af44"

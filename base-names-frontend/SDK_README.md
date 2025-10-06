@@ -332,9 +332,16 @@ const info: DomainInfo = await sdk.domains.getInfo('myname');
 ## Contract Addresses
 
 ### Base Mainnet (8453)
-- Registrar: `0xD158de26c787ABD1E0f2955C442fea9d4DC0a917`
+- Registrar V2: `0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00` (with NFT metadata)
 - Controller: `0xca7FD90f4C76FbCdbdBB3427804374b16058F55e`
 - Resolver: `0x5D5bC53bDa5105561371FEf50B50E03aA94c962E`
+- Metadata Contract: `0xc30A22d048E1F9fe878b779D26c328eBAa7Bb797`
+
+### Base Sepolia Testnet (84532)
+- Registrar V2: `0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9` (with NFT metadata)
+- Controller: `0xCD24477aFCB5D97B3B794a376d6a1De38e640564`
+- Resolver: `0x2927556a0761d6E4A6635CBE9988747625dAe125`
+- Metadata Contract: `0xDb770A373c99DAcE31B8f0e456e9D97CbAed057b`
 
 ## Best Practices
 

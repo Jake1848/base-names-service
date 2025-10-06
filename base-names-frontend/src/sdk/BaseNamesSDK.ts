@@ -128,14 +128,14 @@ export class BaseNamesSDK {
   // Contract addresses
   private readonly CONTRACTS = {
     8453: { // Base Mainnet
-      registrar: '0xD158de26c787ABD1E0f2955C442fea9d4DC0a917' as Address,
+      registrar: '0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00' as Address, // V2 with metadata
       controller: '0xca7FD90f4C76FbCdbdBB3427804374b16058F55e' as Address,
       resolver: '0x5D5bC53bDa5105561371FEf50B50E03aA94c962E' as Address,
     },
     84532: { // Base Sepolia
-      registrar: '0x...' as Address, // Add testnet addresses
-      controller: '0x...' as Address,
-      resolver: '0x...' as Address,
+      registrar: '0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9' as Address, // V2 with metadata
+      controller: '0xCD24477aFCB5D97B3B794a376d6a1De38e640564' as Address,
+      resolver: '0x2927556a0761d6E4A6635CBE9988747625dAe125' as Address,
     }
   };
 

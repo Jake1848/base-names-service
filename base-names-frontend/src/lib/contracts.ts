@@ -6,8 +6,8 @@ export const CONTRACTS = {
     chainId: 8453,
     contracts: {
       ENSRegistry: "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E",
-      BaseRegistrar: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00", // V2 with metadata
-      BaseController: "0xa4E75471F83Fd718Dd1CB4ca6B24cAcf46F0fa34", // V2 - metadata support
+      BaseRegistrar: "0x53F9f3352ea2587734aCA72A5489eB8E7b5444Ca", // V2 FIXED - correct baseNode
+      BaseController: "0x0BDbd26f79a6Ef1339a95aDe6180a823dD0152a8", // V2 FIXED - works with new registrar
       PublicResolver: "0x5D5bC53bDa5105561371FEf50B50E03aA94c962E",
       ReverseRegistrar: "0xD982f3bFf21dCb9421ffBC2000Cfe3C94A01c889",
       BasePriceOracle: "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC"

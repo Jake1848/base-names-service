@@ -1,29 +1,42 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("\n🔧 Setting up mainnet registrar...\n");
+  console.log("\n🔧 Setting up mainnet V2 infrastructure...\n");
 
-  const registrarV2Address = "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00";
-  const controllerAddress = "0xca7FD90f4C76FbCdbdBB3427804374b16058F55e";
+  const newRegistrar = "0x53F9f3352ea2587734aCA72A5489eB8E7b5444Ca";
+  const metadata = "0xc30A22d048E1F9fe878b779D26c328eBAa7Bb797";
 
-  console.log("Registrar V2:", registrarV2Address);
-  console.log("Controller:", controllerAddress);
-  console.log("");
+  // 1. Update metadata
+  console.log("1️⃣ Authorizing new registrar on metadata...");
+  const Metadata = await hre.ethers.getContractFactory("BaseNamesMetadataWithStorage");
+  const metadataContract = Metadata.attach(metadata);
 
-  const RegistrarV2 = await hre.ethers.getContractFactory("BaseRegistrarImplementationV2");
-  const registrarV2 = RegistrarV2.attach(registrarV2Address);
+  const isAuthorized = await metadataContract.authorizedCallers(newRegistrar);
+  if (!isAuthorized) {
+    const tx1 = await metadataContract.setAuthorizedCaller(newRegistrar, true);
+    await tx1.wait();
+    console.log("✅ Authorized! Hash:", tx1.hash);
+  } else {
+    console.log("✅ Already authorized!");
+  }
 
-  // Add controller
-  console.log("📝 Adding controller...");
-  const tx = await registrarV2.addController(controllerAddress);
-  console.log("Transaction hash:", tx.hash);
-  await tx.wait();
-  console.log("✅ Controller added!");
-  console.log("");
+  // 2. Set metadata on registrar
+  console.log("\n2️⃣ Setting metadata on registrar...");
+  const Registrar = await hre.ethers.getContractFactory("BaseRegistrarImplementationV2");
+  const registrar = Registrar.attach(newRegistrar);
 
-  // Verify
-  const isController = await registrarV2.isController(controllerAddress);
-  console.log("Controller authorized:", isController ? "✅ YES" : "❌ NO");
+  const currentMetadata = await registrar.metadataContract();
+  if (currentMetadata.toLowerCase() !== metadata.toLowerCase()) {
+    const tx2 = await registrar.setMetadataContract(metadata);
+    await tx2.wait();
+    console.log("✅ Set! Hash:", tx2.hash);
+  } else {
+    console.log("✅ Already set!");
+  }
+
+  console.log("\n✅ Mainnet V2 setup complete!");
+  console.log("New Registrar:", newRegistrar);
+  console.log("Metadata:", metadata);
 }
 
 main()

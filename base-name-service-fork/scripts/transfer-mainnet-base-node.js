@@ -1,40 +1,59 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("\n🔄 Transferring .base node ownership on mainnet...\n");
+  console.log("\n🔄 Transferring .base node to new V2 registrar on MAINNET...\n");
 
-  const oldRegistrar = "0xD158de26c787ABD1E0f2955C442fea9d4DC0a917";
-  const newRegistrar = "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00";
-
-  console.log("Old Registrar:", oldRegistrar);
-  console.log("New Registrar:", newRegistrar);
-  console.log("");
-
-  const OldReg = await hre.ethers.getContractFactory("BaseRegistrarImplementation");
-  const oldReg = OldReg.attach(oldRegistrar);
-
-  console.log("📝 Transferring base node ownership...");
-  const tx = await oldReg.transferBaseNodeOwnership(newRegistrar);
-  console.log("Transaction hash:", tx.hash);
-
-  await tx.wait();
-  console.log("✅ Ownership transferred!");
-  console.log("");
-
-  // Verify
+  const oldV2Registrar = "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00"; // Wrong baseNode
+  const newV2Registrar = "0x53F9f3352ea2587734aCA72A5489eB8E7b5444Ca"; // Correct baseNode
   const ensRegistry = "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E";
-  const baseNode = hre.ethers.namehash("base");
 
+  console.log("Old V2 Registrar:", oldV2Registrar);
+  console.log("New V2 Registrar:", newV2Registrar);
+  console.log("ENS Registry:", ensRegistry);
+  console.log("");
+
+  const baseNode = hre.ethers.namehash("base");
+  const baseLabel = hre.ethers.keccak256(hre.ethers.toUtf8Bytes("base"));
+  const rootNode = hre.ethers.ZeroHash;
+
+  console.log("Base node:", baseNode);
+  console.log("Base label:", baseLabel);
+  console.log("");
+
+  // Check current owner
   const ENS = await hre.ethers.getContractAt(
-    ["function owner(bytes32 node) external view returns (address)"],
+    ["function owner(bytes32 node) view returns (address)",
+     "function setSubnodeOwner(bytes32 node, bytes32 label, address owner) external returns (bytes32)"],
     ensRegistry
   );
 
-  const newOwner = await ENS.owner(baseNode);
-  console.log("New .base node owner:", newOwner);
-  console.log("Success:", newOwner.toLowerCase() === newRegistrar.toLowerCase() ? "✅ YES" : "❌ NO");
+  const currentOwner = await ENS.owner(baseNode);
+  console.log("Current .base node owner:", currentOwner);
+  console.log("Expected (old V2):", oldV2Registrar);
   console.log("");
-  console.log("🎉 The new registrar now controls .base on mainnet!");
+
+  const [signer] = await hre.ethers.getSigners();
+  const rootOwner = await ENS.owner(rootNode);
+  console.log("Root owner:", rootOwner);
+  console.log("Your address:", signer.address);
+  console.log("");
+
+  if (rootOwner.toLowerCase() === signer.address.toLowerCase()) {
+    console.log("✅ You own the root! Transferring...");
+    const tx = await ENS.setSubnodeOwner(rootNode, baseLabel, newV2Registrar);
+    console.log("Transaction hash:", tx.hash);
+    await tx.wait();
+    console.log("✅ Transfer successful!");
+  } else {
+    console.log("❌ You don't own the root node. Cannot transfer.");
+  }
+
+  // Verify
+  const newOwner = await ENS.owner(baseNode);
+  console.log("\n📋 Final verification:");
+  console.log("New .base node owner:", newOwner);
+  console.log("Expected:", newV2Registrar);
+  console.log("Match:", newOwner.toLowerCase() === newV2Registrar.toLowerCase() ? "✅" : "❌");
 }
 
 main()

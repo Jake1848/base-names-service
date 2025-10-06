@@ -19,7 +19,7 @@ async function main() {
       feeManager: "0x0000000000000000000000000000000000000000" // Placeholder
     },
     base: {
-      registrarV2: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
+      registrarV2: "0x53F9f3352ea2587734aCA72A5489eB8E7b5444Ca", // FIXED: New registrar with correct baseNode
       priceOracle: "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC",
       ensRegistry: "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E",
       reverseRegistrar: "0xD982f3bFf21dCb9421ffBC2000Cfe3C94A01c889",

@@ -12,8 +12,8 @@ async function main() {
       controllerV2: "0x8E3132Ce6649627a8Cd5372F4a5Ebf553df5eaf6" // NEW: Fixed controller
     },
     base: {
-      registrarV2: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
-      controllerV2: "0xa4E75471F83Fd718Dd1CB4ca6B24cAcf46F0fa34"
+      registrarV2: "0x53F9f3352ea2587734aCA72A5489eB8E7b5444Ca", // FIXED: New registrar
+      controllerV2: "0x0BDbd26f79a6Ef1339a95aDe6180a823dD0152a8" // FIXED: New controller
     }
   };
 

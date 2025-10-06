@@ -1,10 +1,10 @@
 {
   "network": "base",
-  "controllerV2": "0xa4E75471F83Fd718Dd1CB4ca6B24cAcf46F0fa34",
-  "registrarV2": "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
+  "controllerV2": "0x0BDbd26f79a6Ef1339a95aDe6180a823dD0152a8",
+  "registrarV2": "0x53F9f3352ea2587734aCA72A5489eB8E7b5444Ca",
   "priceOracle": "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC",
   "minCommitmentAge": 60,
   "maxCommitmentAge": 86400,
-  "deployedAt": "2025-10-06T13:56:05.265Z",
-  "blockNumber": 36484809
+  "deployedAt": "2025-10-06T14:43:09.263Z",
+  "blockNumber": 36486221
 }

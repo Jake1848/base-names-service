@@ -10,19 +10,19 @@ async function main() {
   const config = {
     "base-sepolia": {
       ens: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
-      baseNode: "0x0902329b42866a8e566c30c58f4c3e1b42c05c82b5e42619c478968c7c1f2a79", // namehash('base')
+      baseNode: "0x7e7650bbd57a49caffbb4c83ce43045d2653261b7953b80d47500d9eb37b6134", // FIXED: correct namehash('base')
       metadata: "0xDb770A373c99DAcE31B8f0e456e9D97CbAed057b",
       oldRegistrar: "0x69b81319958388b5133DF617Ba542FB6c9e03177"
     },
     baseSepolia: {
       ens: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
-      baseNode: "0x0902329b42866a8e566c30c58f4c3e1b42c05c82b5e42619c478968c7c1f2a79",
+      baseNode: "0x7e7650bbd57a49caffbb4c83ce43045d2653261b7953b80d47500d9eb37b6134", // FIXED: correct namehash('base')
       metadata: "0xDb770A373c99DAcE31B8f0e456e9D97CbAed057b",
       oldRegistrar: "0x69b81319958388b5133DF617Ba542FB6c9e03177"
     },
     base: {
       ens: "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E",
-      baseNode: "0x0902329b42866a8e566c30c58f4c3e1b42c05c82b5e42619c478968c7c1f2a79",
+      baseNode: "0x7e7650bbd57a49caffbb4c83ce43045d2653261b7953b80d47500d9eb37b6134", // FIXED: correct namehash('base')
       metadata: "0xc30A22d048E1F9fe878b779D26c328eBAa7Bb797",
       oldRegistrar: "0xD158de26c787ABD1E0f2955C442fea9d4DC0a917"
     }

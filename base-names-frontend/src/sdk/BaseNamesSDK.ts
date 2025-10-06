@@ -133,8 +133,8 @@ export class BaseNamesSDK {
       resolver: '0x5D5bC53bDa5105561371FEf50B50E03aA94c962E' as Address,
     },
     84532: { // Base Sepolia
-      registrar: '0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9' as Address, // V2 with metadata
-      controller: '0x60f6BD54E360E24d975fE0DBF6923579636Af484' as Address, // V2 - metadata support
+      registrar: '0xc22BB0C1C7D611686CF9DE6894Bf9B6D87D24ba6' as Address, // V2 FIXED - correct baseNode
+      controller: '0x8E3132Ce6649627a8Cd5372F4a5Ebf553df5eaf6' as Address, // V2 FIXED - works with new registrar
       resolver: '0x2927556a0761d6E4A6635CBE9988747625dAe125' as Address,
     }
   };

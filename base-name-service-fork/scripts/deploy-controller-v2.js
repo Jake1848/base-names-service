@@ -9,7 +9,7 @@ async function main() {
   // Network-specific configuration
   const config = {
     "base-sepolia": {
-      registrarV2: "0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9",
+      registrarV2: "0xc22BB0C1C7D611686CF9DE6894Bf9B6D87D24ba6", // FIXED: New registrar with correct baseNode
       priceOracle: "0x83eF9752EE4f706Ce1f6aa3D32fA1f9f07c2baEb",
       ensRegistry: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
       reverseRegistrar: "0xC97018De65cDD20c6e9d264316139efA747b2E7A",

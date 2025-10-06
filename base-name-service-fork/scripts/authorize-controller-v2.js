@@ -8,8 +8,8 @@ async function main() {
 
   const config = {
     "base-sepolia": {
-      registrarV2: "0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9",
-      controllerV2: "0x60f6BD54E360E24d975fE0DBF6923579636Af484"
+      registrarV2: "0xc22BB0C1C7D611686CF9DE6894Bf9B6D87D24ba6", // NEW: Fixed registrar
+      controllerV2: "0x8E3132Ce6649627a8Cd5372F4a5Ebf553df5eaf6" // NEW: Fixed controller
     },
     base: {
       registrarV2: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",

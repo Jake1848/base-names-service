@@ -17,10 +17,10 @@ export const CONTRACTS = {
     chainId: 84532,
     contracts: {
       ENSRegistry: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
-      BaseRegistrar: "0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9", // V2 with metadata
+      BaseRegistrar: "0xc22BB0C1C7D611686CF9DE6894Bf9B6D87D24ba6", // V2 FIXED - correct baseNode
       ReverseRegistrar: "0xa1f10499B1D1a1c249443d82aaDA9ff7F3AE99cF",
       PublicResolver: "0x2927556a0761d6E4A6635CBE9988747625dAe125",
-      BaseController: "0x60f6BD54E360E24d975fE0DBF6923579636Af484", // V2 - metadata support
+      BaseController: "0x8E3132Ce6649627a8Cd5372F4a5Ebf553df5eaf6", // V2 FIXED - works with new registrar
       BasePriceOracle: "0x3B7d21d238D158eA760FFdB8A5B9A1c3091Bd8c5",
       DomainMarketplace: "0x551Fa1F68656564410F4470162bd4b2B9B057268",
       DomainStaking: "0x6cFdDc0CBD82bAde4fa1DD3774FC72C248b7Af44"

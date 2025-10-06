@@ -1,0 +1,10 @@
+{
+  "network": "base-sepolia",
+  "registrarV2": "0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9",
+  "oldRegistrar": "0x69b81319958388b5133DF617Ba542FB6c9e03177",
+  "ens": "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
+  "baseNode": "0x0902329b42866a8e566c30c58f4c3e1b42c05c82b5e42619c478968c7c1f2a79",
+  "metadata": "0xDb770A373c99DAcE31B8f0e456e9D97CbAed057b",
+  "deployedAt": "2025-10-05T23:39:52.681Z",
+  "blockNumber": 31969653
+}

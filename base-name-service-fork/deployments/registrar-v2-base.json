@@ -1,0 +1,10 @@
+{
+  "network": "base",
+  "registrarV2": "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
+  "oldRegistrar": "0xD158de26c787ABD1E0f2955C442fea9d4DC0a917",
+  "ens": "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E",
+  "baseNode": "0x0902329b42866a8e566c30c58f4c3e1b42c05c82b5e42619c478968c7c1f2a79",
+  "metadata": "0xc30A22d048E1F9fe878b779D26c328eBAa7Bb797",
+  "deployedAt": "2025-10-06T13:12:55.130Z",
+  "blockNumber": 36483514
+}

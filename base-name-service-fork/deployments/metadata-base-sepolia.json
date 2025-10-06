@@ -1,0 +1,8 @@
+{
+  "network": "base-sepolia",
+  "metadataContract": "0xDb770A373c99DAcE31B8f0e456e9D97CbAed057b",
+  "registrar": "0x69b81319958388b5133DF617Ba542FB6c9e03177",
+  "controller": "0xCD24477aFCB5D97B3B794a376d6a1De38e640564",
+  "deployedAt": "2025-10-05T21:26:50.151Z",
+  "blockNumber": 31965661
+}

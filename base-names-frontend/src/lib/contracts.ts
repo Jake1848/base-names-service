@@ -7,7 +7,7 @@ export const CONTRACTS = {
     contracts: {
       ENSRegistry: "0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E",
       BaseRegistrar: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00", // V2 with metadata
-      BaseController: "0xca7FD90f4C76FbCdbdBB3427804374b16058F55e",
+      BaseController: "0xa4E75471F83Fd718Dd1CB4ca6B24cAcf46F0fa34", // V2 - metadata support
       PublicResolver: "0x5D5bC53bDa5105561371FEf50B50E03aA94c962E",
       ReverseRegistrar: "0xD982f3bFf21dCb9421ffBC2000Cfe3C94A01c889",
       BasePriceOracle: "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC"
@@ -20,7 +20,7 @@ export const CONTRACTS = {
       BaseRegistrar: "0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9", // V2 with metadata
       ReverseRegistrar: "0xa1f10499B1D1a1c249443d82aaDA9ff7F3AE99cF",
       PublicResolver: "0x2927556a0761d6E4A6635CBE9988747625dAe125",
-      BaseController: "0xCD24477aFCB5D97B3B794a376d6a1De38e640564",
+      BaseController: "0x60f6BD54E360E24d975fE0DBF6923579636Af484", // V2 - metadata support
       BasePriceOracle: "0x3B7d21d238D158eA760FFdB8A5B9A1c3091Bd8c5",
       DomainMarketplace: "0x551Fa1F68656564410F4470162bd4b2B9B057268",
       DomainStaking: "0x6cFdDc0CBD82bAde4fa1DD3774FC72C248b7Af44"

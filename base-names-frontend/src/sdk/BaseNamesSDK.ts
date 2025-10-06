@@ -129,12 +129,12 @@ export class BaseNamesSDK {
   private readonly CONTRACTS = {
     8453: { // Base Mainnet
       registrar: '0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00' as Address, // V2 with metadata
-      controller: '0xca7FD90f4C76FbCdbdBB3427804374b16058F55e' as Address,
+      controller: '0xa4E75471F83Fd718Dd1CB4ca6B24cAcf46F0fa34' as Address, // V2 - metadata support
       resolver: '0x5D5bC53bDa5105561371FEf50B50E03aA94c962E' as Address,
     },
     84532: { // Base Sepolia
       registrar: '0x944C89806e1BF7F0Ce48Ffbd5324faa181B79ba9' as Address, // V2 with metadata
-      controller: '0xCD24477aFCB5D97B3B794a376d6a1De38e640564' as Address,
+      controller: '0x60f6BD54E360E24d975fE0DBF6923579636Af484' as Address, // V2 - metadata support
       resolver: '0x2927556a0761d6E4A6635CBE9988747625dAe125' as Address,
     }
   };

@@ -1,10 +1,10 @@
 {
   "network": "base-sepolia",
-  "controllerV2": "0x8E3132Ce6649627a8Cd5372F4a5Ebf553df5eaf6",
+  "controllerV2": "0x9A2cf9387d74bBa208406DC98Ba3EEE3449a17ed",
   "registrarV2": "0xc22BB0C1C7D611686CF9DE6894Bf9B6D87D24ba6",
   "priceOracle": "0x83eF9752EE4f706Ce1f6aa3D32fA1f9f07c2baEb",
   "minCommitmentAge": 60,
   "maxCommitmentAge": 86400,
-  "deployedAt": "2025-10-06T14:14:38.022Z",
-  "blockNumber": 31995895
+  "deployedAt": "2025-10-07T13:20:44.694Z",
+  "blockNumber": 32037478
 }

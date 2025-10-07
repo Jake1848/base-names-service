@@ -13,10 +13,9 @@ async function main() {
       priceOracle: "0x83eF9752EE4f706Ce1f6aa3D32fA1f9f07c2baEb",
       ensRegistry: "0x5928B6Ff35f61056fCA003A1F8a000d4e89e6F00",
       reverseRegistrar: "0xC97018De65cDD20c6e9d264316139efA747b2E7A",
-      // We'll need to get these addresses or deploy them
-      defaultReverseRegistrar: "0x0000000000000000000000000000000000000000", // Placeholder
-      registrationLimiter: "0x0000000000000000000000000000000000000000", // Placeholder
-      feeManager: "0x0000000000000000000000000000000000000000" // Placeholder
+      defaultReverseRegistrar: "0x0000000000000000000000000000000000000000", // Optional
+      registrationLimiter: "0x823262c6F3283Ac4901f704769aAD39FE6888c27", // From old controller
+      feeManager: "0x7b84068C4eF344bA11eF3F9D322305618Df57bBA" // From old controller
     },
     base: {
       registrarV2: "0x53F9f3352ea2587734aCA72A5489eB8E7b5444Ca", // FIXED: New registrar with correct baseNode

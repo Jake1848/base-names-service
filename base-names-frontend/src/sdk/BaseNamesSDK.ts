@@ -134,7 +134,7 @@ export class BaseNamesSDK {
     },
     84532: { // Base Sepolia
       registrar: '0xc22BB0C1C7D611686CF9DE6894Bf9B6D87D24ba6' as Address, // V2 FIXED - correct baseNode
-      controller: '0x8E3132Ce6649627a8Cd5372F4a5Ebf553df5eaf6' as Address, // V2 FIXED - works with new registrar
+      controller: '0x9A2cf9387d74bBa208406DC98Ba3EEE3449a17ed' as Address, // V2 FIXED - works with new registrar
       resolver: '0x2927556a0761d6E4A6635CBE9988747625dAe125' as Address,
     }
   };

@@ -20,7 +20,7 @@ export const CONTRACTS = {
       BaseRegistrar: "0xc22BB0C1C7D611686CF9DE6894Bf9B6D87D24ba6", // V2 FIXED - correct baseNode
       ReverseRegistrar: "0xa1f10499B1D1a1c249443d82aaDA9ff7F3AE99cF",
       PublicResolver: "0x2927556a0761d6E4A6635CBE9988747625dAe125",
-      BaseController: "0x8E3132Ce6649627a8Cd5372F4a5Ebf553df5eaf6", // V2 FIXED - works with new registrar
+      BaseController: "0x9A2cf9387d74bBa208406DC98Ba3EEE3449a17ed", // V2 FIXED - works with new registrar
       BasePriceOracle: "0x3B7d21d238D158eA760FFdB8A5B9A1c3091Bd8c5",
       DomainMarketplace: "0x551Fa1F68656564410F4470162bd4b2B9B057268",
       DomainStaking: "0x6cFdDc0CBD82bAde4fa1DD3774FC72C248b7Af44"

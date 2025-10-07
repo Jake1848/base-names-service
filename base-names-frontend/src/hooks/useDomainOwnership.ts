@@ -14,7 +14,7 @@ export interface OwnedDomain {
 }
 
 export function useDomainOwnership() {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const [domains, setDomains] = useState<OwnedDomain[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,11 @@ export function useDomainOwnership() {
       setError(null);
 
       try {
-        const registrarAddress = CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as Address;
+        // Get contracts for current chain
+        const contracts = chainId === 8453
+          ? CONTRACTS.BASE_MAINNET.contracts
+          : CONTRACTS.BASE_SEPOLIA.contracts;
+        const registrarAddress = contracts.BaseRegistrar as Address;
 
         // Fetch Transfer events where the 'to' address is the user
         // This gives us all domains transferred to this user
@@ -86,9 +90,21 @@ export function useDomainOwnership() {
               args: [tokenId]
             }) as bigint;
 
-            // Calculate domain name from tokenId (reverse labelhash)
-            // For now, use tokenId as identifier - in production, maintain name->tokenId mapping
-            const name = `domain-${tokenId.toString().slice(0, 8)}`;
+            // Get domain label from V2 registrar
+            let name = `domain-${tokenId.toString().slice(0, 8)}`; // Fallback
+            try {
+              const label = await publicClient.readContract({
+                address: registrarAddress,
+                abi: ABIS.BaseRegistrar,
+                functionName: 'labels',
+                args: [tokenId]
+              }) as string;
+              if (label && label.length > 0) {
+                name = label;
+              }
+            } catch (err) {
+              console.log(`Could not fetch label for ${tokenId}, using fallback`);
+            }
 
             // Get registration event for this token
             const registrationLogs = await publicClient.getLogs({

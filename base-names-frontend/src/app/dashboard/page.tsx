@@ -13,7 +13,7 @@ import { useDomainOwnership } from '@/hooks/useDomainOwnership';
 import { CONTRACTS } from '@/lib/contracts';
 
 export default function DashboardPage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
   const { domains, loading, error } = useDomainOwnership();
 
   if (!isConnected) {
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                         asChild
                       >
                         <a
-                          href={`https://basescan.org/token/${CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar}/${domain.tokenId.toString()}`}
+                          href={`https://${chainId === 84532 ? 'sepolia.' : ''}basescan.org/token/${chainId === 8453 ? CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar : CONTRACTS.BASE_SEPOLIA.contracts.BaseRegistrar}/${domain.tokenId.toString()}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

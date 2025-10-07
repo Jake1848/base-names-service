@@ -53,6 +53,13 @@ export const ABIS = {
       outputs: [{ name: '', type: 'uint256' }]
     },
     {
+      name: 'labels',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'tokenId', type: 'uint256' }],
+      outputs: [{ name: '', type: 'string' }]
+    },
+    {
       name: 'register',
       type: 'function',
       stateMutability: 'nonpayable',

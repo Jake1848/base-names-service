@@ -26,9 +26,17 @@ function useRealMarketplaceData() {
   const { events: registrationEvents } = useRegistrationEvents();
   const marketplaceData = useMarketplaceData();
 
+  // Get current chain contracts
+  const chainId = typeof window !== 'undefined' && (window as any).ethereum
+    ? (window as any).ethereum.chainId
+    : 8453;
+  const contracts = chainId === 8453 || chainId === '0x2105'
+    ? CONTRACTS.BASE_MAINNET.contracts
+    : CONTRACTS.BASE_SEPOLIA.contracts;
+
   // Get availability status for all domains
   const domainChecks = PREMIUM_DOMAINS.slice(0, 50).map(domain => ({
-    address: CONTRACTS.BASE_MAINNET.contracts.BaseRegistrar as `0x${string}`,
+    address: contracts.BaseRegistrar as `0x${string}`,
     abi: ABIS.BaseRegistrar,
     functionName: 'available',
     args: [labelHash(domain)],

@@ -10,7 +10,8 @@ export const CONTRACTS = {
       BaseController: "0x0BDbd26f79a6Ef1339a95aDe6180a823dD0152a8", // V2 FIXED - works with new registrar
       PublicResolver: "0x5D5bC53bDa5105561371FEf50B50E03aA94c962E",
       ReverseRegistrar: "0xD982f3bFf21dCb9421ffBC2000Cfe3C94A01c889",
-      BasePriceOracle: "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC"
+      BasePriceOracle: "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC",
+      DomainMarketplace: "0x35FF50Fd54e7de7CBc5722C9d380966db049e573" // Deployed Oct 2025
     }
   },
   BASE_SEPOLIA: {
@@ -153,7 +154,52 @@ export const ABIS = {
     "function setAddr(bytes32 node, address addr) external",
     "function text(bytes32 node, string key) view returns (string)",
     "function setText(bytes32 node, string key, string value) external"
-  ]
+  ],
+  DomainMarketplace: [
+    {
+      name: 'createListing',
+      type: 'function',
+      stateMutability: 'nonpayable',
+      inputs: [
+        { name: 'tokenId', type: 'uint256' },
+        { name: 'price', type: 'uint256' }
+      ],
+      outputs: []
+    },
+    {
+      name: 'buyListing',
+      type: 'function',
+      stateMutability: 'payable',
+      inputs: [{ name: 'tokenId', type: 'uint256' }],
+      outputs: []
+    },
+    {
+      name: 'cancelListing',
+      type: 'function',
+      stateMutability: 'nonpayable',
+      inputs: [{ name: 'tokenId', type: 'uint256' }],
+      outputs: []
+    },
+    {
+      name: 'getListing',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'tokenId', type: 'uint256' }],
+      outputs: [
+        { name: 'seller', type: 'address' },
+        { name: 'price', type: 'uint256' },
+        { name: 'createdAt', type: 'uint256' },
+        { name: 'active', type: 'bool' }
+      ]
+    },
+    {
+      name: 'isListed',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [{ name: 'tokenId', type: 'uint256' }],
+      outputs: [{ name: '', type: 'bool' }]
+    }
+  ] as const
 };
 
 // Premium domains available for registration

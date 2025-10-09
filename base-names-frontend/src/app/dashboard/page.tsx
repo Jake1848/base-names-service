@@ -6,11 +6,112 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Calendar, Clock, Settings, RefreshCw, Wallet, AlertCircle, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, Settings, RefreshCw, Wallet, AlertCircle, ExternalLink, DollarSign, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { useDomainOwnership } from '@/hooks/useDomainOwnership';
+import { useMarketplace, useDomainListing } from '@/hooks/useMarketplace';
 import { CONTRACTS } from '@/lib/contracts';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+
+function ListDomainDialog({ domain }: { domain: any }) {
+  const [price, setPrice] = useState('');
+  const [isListingdialogopen, setIsListingDialogOpen] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isListing, setIsListing] = useState(false);
+
+  const { approveMarketplace, listDomain } = useMarketplace();
+  const { isListed, price: currentPrice } = useDomainListing(domain.tokenId);
+
+  const handleList = async () => {
+    if (!price || parseFloat(price) <= 0) {
+      toast.error('Please enter a valid price');
+      return;
+    }
+
+    try {
+      // Step 1: Approve marketplace
+      setIsApproving(true);
+      await approveMarketplace(domain.tokenId);
+      setIsApproving(false);
+
+      // Step 2: List domain
+      setIsListing(true);
+      await listDomain(domain.tokenId, price);
+      setIsListing(false);
+
+      setIsListingDialogOpen(false);
+      setPrice('');
+
+      toast.success('Domain listed on marketplace!');
+    } catch (error) {
+      setIsApproving(false);
+      setIsListing(false);
+    }
+  };
+
+  if (isListed) {
+    return (
+      <Badge variant="secondary" className="mt-2">
+        <Tag className="w-3 h-3 mr-1" />
+        Listed for {currentPrice ? (Number(currentPrice) / 1e18).toFixed(3) : '...'} ETH
+      </Badge>
+    );
+  }
+
+  return (
+    <Dialog open={isListingdialogopen} onOpenChange={setIsListingDialogOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="default" className="flex-1">
+          <DollarSign className="w-3 h-3 mr-1" />
+          List for Sale
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>List {domain.name}.base for Sale</DialogTitle>
+          <DialogDescription>
+            Set your price and list your domain on the marketplace
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div>
+            <label className="text-sm font-medium">Price (ETH)</label>
+            <Input
+              type="number"
+              step="0.001"
+              placeholder="0.1"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="mt-1"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Marketplace fee: 2.5% • You'll receive {price ? (parseFloat(price) * 0.975).toFixed(4) : '0'} ETH
+            </p>
+          </div>
+          <div className="bg-muted p-3 rounded-lg space-y-1 text-sm">
+            <p><strong>Step 1:</strong> Approve marketplace contract</p>
+            <p><strong>Step 2:</strong> Create listing</p>
+          </div>
+          <Button
+            onClick={handleList}
+            className="w-full"
+            disabled={isApproving || isListing || !price}
+          >
+            {isApproving ? 'Approving...' : isListing ? 'Listing...' : 'List Domain'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function DashboardPage() {
   const { address, isConnected, chainId } = useAccount();
@@ -136,6 +237,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4">
+                      <ListDomainDialog domain={domain} />
                       <Button
                         size="sm"
                         variant="outline"
@@ -148,7 +250,7 @@ export default function DashboardPage() {
                           rel="noopener noreferrer"
                         >
                           <ExternalLink className="w-3 h-3 mr-1" />
-                          View on BaseScan
+                          BaseScan
                         </a>
                       </Button>
                     </div>

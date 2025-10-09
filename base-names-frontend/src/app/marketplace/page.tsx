@@ -15,11 +15,12 @@ import {
 } from '@/components/ui/select';
 import { PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING, CONTRACTS, ABIS, labelHash } from '@/lib/contracts';
 import { useRegistrationEvents, useMarketplaceData, useDomainOwnership } from '@/lib/blockchain-data';
-import { useReadContracts } from 'wagmi';
+import { useReadContracts, useAccount } from 'wagmi';
 import { Search, Heart, Crown, TrendingUp, ShoppingCart, DollarSign, Zap, ArrowUpRight, ArrowDownRight, Grid3X3, List, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useMarketplace, useDomainListing } from '@/hooks/useMarketplace';
 
 // Hook to get real marketplace data from blockchain
 function useRealMarketplaceData() {
@@ -127,6 +128,15 @@ function MarketplaceDomainCard({
 }) {
   // All hooks must be called before any early returns
   const [isLiked, setIsLiked] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
+  const { buyDomain } = useMarketplace();
+  const { isConnected } = useAccount();
+
+  // Get tokenId from domain name
+  const tokenId = domain?.domain ? labelHash(domain.domain.replace('.base', '')) : BigInt(0);
+
+  // Check if domain is actually listed on marketplace
+  const { isListed, price: listingPrice } = useDomainListing(tokenId);
 
   // Safety check for domain object
   if (!domain) {
@@ -143,15 +153,41 @@ function MarketplaceDomainCard({
   const priceChange = safePreviousPrice > 0 ? ((safePrice - safePreviousPrice) / safePreviousPrice * 100).toFixed(2) : '0';
   const isPositive = parseFloat(priceChange) > 0;
 
-  const handleBuyNow = () => {
-    toast.success(`Purchase initiated for ${domain?.domain || 'domain'}`, {
-      description: 'Redirecting to checkout...',
-    });
+  const handleBuyNow = async () => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet');
+      return;
+    }
+
+    if (isListed && listingPrice) {
+      // Buy from marketplace
+      setIsBuying(true);
+      try {
+        const priceInEth = (Number(listingPrice) / 1e18).toString();
+        await buyDomain(tokenId, priceInEth);
+        toast.success('Domain purchased!');
+      } catch (error) {
+        // Error already handled in hook
+      } finally {
+        setIsBuying(false);
+      }
+    } else if (domain.isAvailable) {
+      // Redirect to registration
+      toast.info(`Domain available for registration`, {
+        description: 'Redirecting to home page...',
+        action: {
+          label: 'Register',
+          onClick: () => window.location.href = `/?search=${domain.domain.replace('.base', '')}`
+        }
+      });
+    } else {
+      toast.error('This domain is not for sale');
+    }
   };
 
   const handleMakeOffer = () => {
     toast.info(`Make an offer for ${domain?.domain || 'domain'}`, {
-      description: 'Opening offer modal...',
+      description: 'Offer functionality coming soon!',
     });
   };
 
@@ -225,8 +261,8 @@ function MarketplaceDomainCard({
                   <Button size="sm" variant="outline" onClick={handleMakeOffer}>
                     Make Offer
                   </Button>
-                  <Button size="sm" onClick={handleBuyNow}>
-                    Buy Now
+                  <Button size="sm" onClick={handleBuyNow} disabled={isBuying}>
+                    {isBuying ? 'Buying...' : isListed ? 'Buy Now' : domain.isAvailable ? 'Register' : 'View'}
                   </Button>
                 </div>
               </div>
@@ -320,8 +356,9 @@ function MarketplaceDomainCard({
                 size="sm"
                 className="w-full"
                 onClick={handleBuyNow}
+                disabled={isBuying}
               >
-                Buy
+                {isBuying ? 'Buying...' : isListed ? 'Buy' : domain.isAvailable ? 'Register' : 'View'}
               </Button>
             </div>
           </div>

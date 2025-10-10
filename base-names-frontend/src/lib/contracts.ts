@@ -11,7 +11,7 @@ export const CONTRACTS = {
       PublicResolver: "0x5D5bC53bDa5105561371FEf50B50E03aA94c962E",
       ReverseRegistrar: "0xD982f3bFf21dCb9421ffBC2000Cfe3C94A01c889",
       BasePriceOracle: "0xA1805458A1C1294D53eBBBd025B397F89Dd963AC",
-      DomainMarketplace: "0x35FF50Fd54e7de7CBc5722C9d380966db049e573" // Deployed Oct 2025
+      DomainMarketplace: "0x96F308aC9AAf5416733dFc92188320D24409D4D1" // V2 with fee fix - Oct 2025
     }
   },
   BASE_SEPOLIA: {

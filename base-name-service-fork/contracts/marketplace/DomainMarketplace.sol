@@ -59,6 +59,9 @@ contract DomainMarketplace is ReentrancyGuard, Pausable, Ownable, IERC721Receive
     // Track pending returns for outbid bidders
     mapping(address => uint256) public pendingReturns;
 
+    // Track accumulated fees (separate from locked funds)
+    uint256 public accumulatedFees;
+
     // Events
     event Listed(
         uint256 indexed tokenId,
@@ -179,6 +182,7 @@ contract DomainMarketplace is ReentrancyGuard, Pausable, Ownable, IERC721Receive
 
         // CHECKS-EFFECTS-INTERACTIONS: Update state BEFORE external calls
         listing.active = false;
+        accumulatedFees += fee; // Track fees separately
 
         // External interactions come AFTER state changes
         // Transfer domain to buyer
@@ -303,6 +307,7 @@ contract DomainMarketplace is ReentrancyGuard, Pausable, Ownable, IERC721Receive
             // Calculate fee and seller proceeds
             uint256 fee = (auction.currentBid * marketplaceFee) / BASIS_POINTS;
             uint256 sellerProceeds = auction.currentBid - fee;
+            accumulatedFees += fee; // Track fees separately
 
             // Transfer proceeds to seller
             (bool success, ) = auction.seller.call{value: sellerProceeds}("");
@@ -386,15 +391,15 @@ contract DomainMarketplace is ReentrancyGuard, Pausable, Ownable, IERC721Receive
 
     /**
      * @notice Withdraw accumulated fees
+     * @dev Only withdraws fees, not locked auction funds or pending returns
      */
     function withdrawFees() external onlyOwner {
-        uint256 balance = address(this).balance;
+        uint256 amount = accumulatedFees;
+        require(amount > 0, "No fees to withdraw");
 
-        // Calculate total locked in auctions and pending returns
-        // (This is simplified - in production, track fees separately)
-        require(balance > 0, "No fees to withdraw");
+        accumulatedFees = 0;
 
-        (bool success, ) = owner().call{value: balance}("");
+        (bool success, ) = owner().call{value: amount}("");
         require(success, "Withdrawal failed");
     }
 

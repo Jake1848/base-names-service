@@ -27,8 +27,9 @@ function ListDomainDialog({ domain }: { domain: any }) {
   const [isApproving, setIsApproving] = useState(false);
   const [isListing, setIsListing] = useState(false);
 
-  const { approveMarketplace, listDomain } = useMarketplace();
-  const { isListed, price: currentPrice } = useDomainListing(domain.tokenId);
+  const { approveMarketplace, listDomain, cancelListing } = useMarketplace();
+  const { isListed, price: currentPrice, refetch } = useDomainListing(domain.tokenId);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleList = async () => {
     if (!price || parseFloat(price) <= 0) {
@@ -51,18 +52,43 @@ function ListDomainDialog({ domain }: { domain: any }) {
       setPrice('');
 
       toast.success('Domain listed on marketplace!');
+      refetch(); // Refresh listing status
     } catch (error) {
       setIsApproving(false);
       setIsListing(false);
     }
   };
 
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    try {
+      await cancelListing(domain.tokenId);
+      toast.success('Listing cancelled successfully!');
+      refetch(); // Refresh listing status
+    } catch (error) {
+      // Error already handled in hook
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   if (isListed) {
     return (
-      <Badge variant="secondary" className="mt-2">
-        <Tag className="w-3 h-3 mr-1" />
-        Listed for {currentPrice ? (Number(currentPrice) / 1e18).toFixed(3) : '...'} ETH
-      </Badge>
+      <div className="flex flex-col gap-2">
+        <Badge variant="secondary" className="w-full justify-center">
+          <Tag className="w-3 h-3 mr-1" />
+          Listed for {currentPrice ? (Number(currentPrice) / 1e18).toFixed(3) : '...'} ETH
+        </Badge>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleCancel}
+          disabled={isCancelling}
+          className="w-full"
+        >
+          {isCancelling ? 'Cancelling...' : 'Cancel Listing'}
+        </Button>
+      </div>
     );
   }
 

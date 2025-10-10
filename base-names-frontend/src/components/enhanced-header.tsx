@@ -40,11 +40,7 @@ export function EnhancedHeader() {
   const navigation = [
     { name: 'Home', href: '/', icon: Globe },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'DeFi', href: '/defi', icon: Coins },
-    { name: 'Bridge', href: '/bridge', icon: ArrowLeftRight },
     { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
-    { name: 'Auctions', href: '/auctions', icon: Gavel },
-    { name: 'Enterprise', href: '/enterprise', icon: Building2 },
     { name: 'Analytics', href: '/analytics', icon: TrendingUp },
   ];
 

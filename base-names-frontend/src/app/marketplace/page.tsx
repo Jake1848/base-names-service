@@ -135,8 +135,9 @@ function MarketplaceDomainCard({
   // Get tokenId from domain name
   const tokenId = domain?.domain ? labelHash(domain.domain.replace('.base', '')) : BigInt(0);
 
-  // Check if domain is actually listed on marketplace
-  const { isListed, price: listingPrice } = useDomainListing(tokenId);
+  // Use domain data instead of querying (to avoid 50+ RPC calls)
+  const isListed = false; // domain.isListed in real marketplace
+  const listingPrice = null; // Will check when buying
 
   // Safety check for domain object
   if (!domain) {

@@ -1,15 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PREMIUM_DOMAINS, CONTRACTS, ABIS } from '@/lib/contracts';
-import { TrendingUp, Users, DollarSign, Activity, ArrowUp, ArrowDown, ExternalLink, Download, Calendar, BarChart3, PieChartIcon, RefreshCw } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Activity, ArrowUp, ArrowDown, ExternalLink, Download, BarChart3, PieChartIcon, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useReadContract } from 'wagmi';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useRegistrationStats, useMarketplaceData, useDomainPricing, useRegistrationEvents } from '@/lib/blockchain-data';
 import { toast } from 'sonner';
 

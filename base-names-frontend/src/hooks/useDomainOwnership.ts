@@ -161,7 +161,7 @@ export function useDomainOwnership() {
     }
 
     fetchUserDomains();
-  }, [address, publicClient]);
+  }, [address, publicClient, chainId]);
 
   return { domains, loading, error };
 }

@@ -1,0 +1,231 @@
+
+> base-names-frontend@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 869ms
+ ✓ Compiled successfully in 8.1s
+   Linting and checking validity of types ...
+
+./src/app/analytics/page.tsx
+3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+8:10  Warning: 'PREMIUM_DOMAINS' is defined but never used.  @typescript-eslint/no-unused-vars
+8:27  Warning: 'CONTRACTS' is defined but never used.  @typescript-eslint/no-unused-vars
+8:38  Warning: 'ABIS' is defined but never used.  @typescript-eslint/no-unused-vars
+9:95  Warning: 'Calendar' is defined but never used.  @typescript-eslint/no-unused-vars
+11:10  Warning: 'LineChart' is defined but never used.  @typescript-eslint/no-unused-vars
+11:21  Warning: 'Line' is defined but never used.  @typescript-eslint/no-unused-vars
+12:10  Warning: 'useReadContract' is defined but never used.  @typescript-eslint/no-unused-vars
+20:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+34:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+34:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/cookies/page.tsx
+181:157  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+181:170  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/app/dashboard/page.tsx
+24:49  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+56:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+68:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+122:42  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+143:11  Warning: 'address' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+144:29  Warning: 'error' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+225:26  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+299:19  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/disclaimer/page.tsx
+2:25  Warning: 'ExternalLink' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/docs/page.tsx
+7:3  Warning: 'Wallet' is defined but never used.  @typescript-eslint/no-unused-vars
+11:3  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+12:3  Warning: 'AlertTriangle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/help/page.tsx
+5:3  Warning: 'Search' is defined but never used.  @typescript-eslint/no-unused-vars
+6:3  Warning: 'Wallet' is defined but never used.  @typescript-eslint/no-unused-vars
+13:3  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/page.tsx
+3:39  Warning: 'Suspense' is defined but never used.  @typescript-eslint/no-unused-vars
+6:10  Warning: 'keccak256' is defined but never used.  @typescript-eslint/no-unused-vars
+6:21  Warning: 'encodePacked' is defined but never used.  @typescript-eslint/no-unused-vars
+6:35  Warning: 'encodeAbiParameters' is defined but never used.  @typescript-eslint/no-unused-vars
+8:45  Warning: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+8:97  Warning: 'RefreshCw' is defined but never used.  @typescript-eslint/no-unused-vars
+8:118  Warning: 'Star' is defined but never used.  @typescript-eslint/no-unused-vars
+12:10  Warning: 'CONTRACTS' is defined but never used.  @typescript-eslint/no-unused-vars
+12:44  Warning: 'PREMIUM_DOMAINS_CATEGORIES' is defined but never used.  @typescript-eslint/no-unused-vars
+12:72  Warning: 'getDomainTier' is defined but never used.  @typescript-eslint/no-unused-vars
+12:87  Warning: 'DOMAIN_PRICING' is defined but never used.  @typescript-eslint/no-unused-vars
+16:10  Warning: 'Input' is defined but never used.  @typescript-eslint/no-unused-vars
+17:29  Warning: 'formatPrice' is defined but never used.  @typescript-eslint/no-unused-vars
+255:11  Warning: 'switchChain' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+306:37  Warning: 'isConfirming' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+306:62  Warning: 'isConfirmed' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+399:31  Warning: 'priceError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+444:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+1080:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/privacy/page.tsx
+2:18  Warning: 'Eye' is defined but never used.  @typescript-eslint/no-unused-vars
+2:23  Warning: 'Database' is defined but never used.  @typescript-eslint/no-unused-vars
+161:165  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+161:178  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/app/terms/page.tsx
+34:61  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+34:69  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+34:122  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+34:128  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/components/enhanced-footer.tsx
+85:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/enhanced-header.tsx
+7:51  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+7:61  Warning: 'HelpCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+7:111  Warning: 'Gavel' is defined but never used.  @typescript-eslint/no-unused-vars
+7:118  Warning: 'Building2' is defined but never used.  @typescript-eslint/no-unused-vars
+7:129  Warning: 'ArrowLeftRight' is defined but never used.  @typescript-eslint/no-unused-vars
+7:145  Warning: 'Coins' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/enhanced-search.tsx
+11:10  Warning: 'Badge' is defined but never used.  @typescript-eslint/no-unused-vars
+75:11  Warning: 'switchChain' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+89:31  Warning: 'priceError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+134:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/test-minting.tsx
+15:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+16:58  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+43:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/input.tsx
+5:18  Warning: An interface declaring no members is equivalent to its supertype.  @typescript-eslint/no-empty-object-type
+
+./src/hooks/useDomainOwnership.ts
+105:22  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/hooks/useDomainRegistry.ts
+63:20  Warning: 'log' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/hooks/useMarketplace.ts
+3:27  Warning: 'labelHash' is defined but never used.  @typescript-eslint/no-unused-vars
+29:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+54:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+78:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+113:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/useMarketplaceEvents.ts
+1:10  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+3:21  Warning: 'ABIS' is defined but never used.  @typescript-eslint/no-unused-vars
+40:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+79:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+116:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/blockchain-data.ts
+2:44  Warning: 'PREMIUM_DOMAINS_CATEGORIES' is defined but never used.  @typescript-eslint/no-unused-vars
+4:24  Warning: 'formatEther' is defined but never used.  @typescript-eslint/no-unused-vars
+4:37  Warning: 'keccak256' is defined but never used.  @typescript-eslint/no-unused-vars
+4:48  Warning: 'toBytes' is defined but never used.  @typescript-eslint/no-unused-vars
+25:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+78:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:24  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+181:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/test-minting.ts
+1:36  Warning: 'parseEther' is defined but never used.  @typescript-eslint/no-unused-vars
+142:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+162:28  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+170:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+223:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/sdk/BaseNamesSDK.ts
+30:14  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+125:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+126:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+296:24  Warning: 'tokenId' is defined but never used.  @typescript-eslint/no-unused-vars
+305:27  Warning: 'tokenId' is defined but never used.  @typescript-eslint/no-unused-vars
+305:44  Warning: 'price' is defined but never used.  @typescript-eslint/no-unused-vars
+317:24  Warning: 'tokenId' is defined but never used.  @typescript-eslint/no-unused-vars
+334:24  Warning: 'tokenId' is defined but never used.  @typescript-eslint/no-unused-vars
+343:27  Warning: 'tokenId' is defined but never used.  @typescript-eslint/no-unused-vars
+343:44  Warning: 'startPrice' is defined but never used.  @typescript-eslint/no-unused-vars
+343:64  Warning: 'durationInHours' is defined but never used.  @typescript-eslint/no-unused-vars
+355:22  Warning: 'tokenId' is defined but never used.  @typescript-eslint/no-unused-vars
+355:39  Warning: 'bidAmount' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/16) ...
+ ⚠ Unsupported metadata viewport is configured in metadata export in /privacy. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /_not-found. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /terms. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /docs. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /analytics. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+   Generating static pages (4/16) 
+   Generating static pages (8/16) 
+ ⚠ Unsupported metadata viewport is configured in metadata export in /test. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /api. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /disclaimer. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /help. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /cookies. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /marketplace. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ ⚠ Unsupported metadata viewport is configured in metadata export in /dashboard. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+   Generating static pages (12/16) 
+ ✓ Generating static pages (16/16)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                         Size  First Load JS
+┌ ○ /                            20.1 kB         406 kB
+├ ○ /_not-found                      0 B         386 kB
+├ ○ /analytics                    112 kB         498 kB
+├ ○ /api                             0 B         386 kB
+├ ○ /cookies                         0 B         386 kB
+├ ○ /dashboard                   19.8 kB         406 kB
+├ ○ /disclaimer                      0 B         386 kB
+├ ○ /docs                            0 B         386 kB
+├ ○ /help                            0 B         386 kB
+├ ○ /marketplace                  3.5 kB         390 kB
+├ ○ /privacy                         0 B         386 kB
+├ ○ /terms                           0 B         386 kB
+└ ○ /test                        6.59 kB         393 kB
++ First Load JS shared by all     407 kB
+  ├ chunks/1ac2ea8e26968ba0.js   37.9 kB
+  ├ chunks/2363aab6a7d645e6.js   22.7 kB
+  ├ chunks/3757f37cd6694af5.js   23.5 kB
+  ├ chunks/3c0832ff1cf95003.js   16.2 kB
+  ├ chunks/595bdbd97fe9f9ff.js   59.2 kB
+  ├ chunks/61c3f6cd1e7a6dd6.js   12.6 kB
+  ├ chunks/625aa94c73291667.js   11.3 kB
+  ├ chunks/635363d8830af9fe.js   73.5 kB
+  ├ chunks/882033818a31f8e1.js   34.8 kB
+  ├ chunks/a891ef721b988b86.js   20.8 kB
+  ├ chunks/bbf89c5280eb1f0c.js   17.3 kB
+  ├ chunks/c0b34aaf7cf2b860.js   20.7 kB
+  ├ chunks/ce525ffad6b7de5c.css  16.2 kB
+  └ other shared chunks (total)  40.5 kB
+
+
+○  (Static)  prerendered as static content
+

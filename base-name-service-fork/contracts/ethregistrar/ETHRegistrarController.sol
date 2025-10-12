@@ -570,6 +570,104 @@ contract ETHRegistrarController is
             Address.sendValue(payable(msg.sender), msg.value - price.base);
     }
 
+    /// @notice Test registration function for owner to mint domains for free (testing only)
+    /// @param label The label of the name to register
+    /// @param owner The owner of the name
+    /// @param duration The duration of the registration
+    /// @param resolver The resolver for the name (can be address(0))
+    /// @param data The data for the resolver (can be empty)
+    /// @param reverseRecord Whether to set reverse record
+    /// @dev ONLY FOR TESTING - Owner can bypass payment and commitment for testing purposes
+    function testRegister(
+        string calldata label,
+        address owner,
+        uint256 duration,
+        address resolver,
+        bytes[] calldata data,
+        bool reverseRecord
+    ) external onlyOwner whenNotPaused {
+        require(duration >= MIN_REGISTRATION_DURATION, "Duration too short");
+
+        bytes32 labelhash = keccak256(bytes(label));
+
+        // Validate name is available
+        require(valid(label), "Invalid label");
+        require(base.available(uint256(labelhash)), "Name not available");
+        require(!_isInGracePeriod(labelhash), "Name in grace period");
+
+        // Get price for event emission (but don't charge)
+        IPriceOracle.Price memory price = prices.price(
+            label,
+            base.nameExpires(uint256(labelhash)),
+            duration
+        );
+
+        uint256 expires;
+
+        if (resolver == address(0)) {
+            // Simple registration without resolver
+            expires = base.register(
+                uint256(labelhash),
+                owner,
+                duration
+            );
+        } else {
+            // Registration with resolver
+            expires = base.register(
+                uint256(labelhash),
+                address(this),
+                duration
+            );
+
+            bytes32 namehash = _namehash(labelhash);
+            ens.setRecord(
+                namehash,
+                owner,
+                resolver,
+                0
+            );
+
+            if (data.length > 0) {
+                Resolver(resolver).multicallWithNodeCheck(
+                    namehash,
+                    data
+                );
+            }
+
+            base.transferFrom(
+                address(this),
+                owner,
+                uint256(labelhash)
+            );
+
+            // Set reverse records if requested
+            if (reverseRecord) {
+                reverseRegistrar.setNameForAddr(
+                    msg.sender,
+                    msg.sender,
+                    resolver,
+                    string.concat(label, ".base")
+                );
+                defaultReverseRegistrar.setNameForAddr(
+                    msg.sender,
+                    msg.sender,
+                    address(0),
+                    string.concat(label, ".base")
+                );
+            }
+        }
+
+        emit NameRegistered(
+            label,
+            labelhash,
+            owner,
+            price.base,
+            price.premium,
+            expires,
+            bytes32(0) // No referrer for test registrations
+        );
+    }
+
     /// @notice Sets the referrer fee percentage (only owner)
     /// @param _referrerFeePercentage Fee percentage in basis points (e.g., 500 = 5%)
     function setReferrerFeePercentage(uint256 _referrerFeePercentage) external onlyOwner {

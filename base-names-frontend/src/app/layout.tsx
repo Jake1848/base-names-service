@@ -3,8 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { EnhancedHeader } from "@/components/enhanced-header";
-import { Footer } from "@/components/footer";
+import { EnhancedFooter } from "@/components/enhanced-footer";
 import { Toaster } from "@/components/ui/sonner";
+import { AnimatedBackground } from "@/components/animated-background";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -73,14 +74,15 @@ export default function EnhancedRootLayout({
       </head>
       <body className={`${inter.className} antialiased min-h-screen flex flex-col overflow-x-hidden`}>
         <Providers>
+          <AnimatedBackground />
           {/* Skip to main content for screen readers */}
-          <a 
-            href="#main-content" 
+          <a
+            href="#main-content"
             className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-md z-50 focus:z-[9999]"
           >
             Skip to main content
           </a>
-          
+
           <EnhancedHeader />
           
           <main 
@@ -92,7 +94,7 @@ export default function EnhancedRootLayout({
             {children}
           </main>
           
-          <Footer />
+          <EnhancedFooter />
           
           {/* Toast notifications */}
           <Toaster 

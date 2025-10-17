@@ -17,8 +17,8 @@ export function EnhancedModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
+        <Button 
+          variant="outline" 
           size="icon"
           className="relative overflow-hidden bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
         >
@@ -27,25 +27,25 @@ export function EnhancedModeToggle() {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
+      <DropdownMenuContent 
         align="end"
         className="bg-card/95 backdrop-blur-sm border-primary/20"
       >
-        <DropdownMenuItem
+        <DropdownMenuItem 
           onClick={() => setTheme("light")}
           className="hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
         >
           <Sun className="mr-2 h-4 w-4 text-primary" />
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem
+        <DropdownMenuItem 
           onClick={() => setTheme("dark")}
           className="hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
         >
           <Moon className="mr-2 h-4 w-4 text-primary" />
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem
+        <DropdownMenuItem 
           onClick={() => setTheme("system")}
           className="hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
         >

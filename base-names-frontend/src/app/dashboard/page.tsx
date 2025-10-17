@@ -21,7 +21,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-function ListDomainDialog({ domain }: { domain: any }) {
+interface Domain {
+  tokenId: bigint;
+  name: string;
+  expires: bigint;
+  daysUntilExpiry: number;
+  isExpiringSoon: boolean;
+}
+
+function ListDomainDialog({ domain }: { domain: Domain }) {
   const [price, setPrice] = useState('');
   const [isListingdialogopen, setIsListingDialogOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -53,7 +61,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
 
       toast.success('Domain listed on marketplace!');
       refetch(); // Refresh listing status
-    } catch (error) {
+    } catch {
       setIsApproving(false);
       setIsListing(false);
     }
@@ -65,7 +73,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
       await cancelListing(domain.tokenId);
       toast.success('Listing cancelled successfully!');
       refetch(); // Refresh listing status
-    } catch (error) {
+    } catch {
       // Error already handled in hook
     } finally {
       setIsCancelling(false);
@@ -95,7 +103,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
   return (
     <Dialog open={isListingdialogopen} onOpenChange={setIsListingDialogOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="default" className="flex-1">
+        <Button size="sm" variant="default" className="btn-glow flex-1">
           <DollarSign className="w-3 h-3 mr-1" />
           List for Sale
         </Button>
@@ -119,7 +127,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
               className="mt-1"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Marketplace fee: 2.5% • You'll receive {price ? (parseFloat(price) * 0.975).toFixed(4) : '0'} ETH
+              Marketplace fee: 2.5% • You&apos;ll receive {price ? (parseFloat(price) * 0.975).toFixed(4) : '0'} ETH
             </p>
           </div>
           <div className="bg-muted p-3 rounded-lg space-y-1 text-sm">
@@ -140,8 +148,8 @@ function ListDomainDialog({ domain }: { domain: any }) {
 }
 
 export default function DashboardPage() {
-  const { address, isConnected, chainId } = useAccount();
-  const { domains, loading, error } = useDomainOwnership();
+  const { isConnected, chainId } = useAccount();
+  const { domains, loading } = useDomainOwnership();
 
   if (!isConnected) {
     return (
@@ -168,7 +176,7 @@ export default function DashboardPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold mb-2">My Domains</h1>
+              <h1 className="neon-glow-text text-4xl font-bold mb-2">My Domains</h1>
               <p className="text-muted-foreground">Manage your .base domain portfolio</p>
             </div>
             <Button onClick={() => window.location.reload()} variant="outline">
@@ -179,13 +187,13 @@ export default function DashboardPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
+            <Card className="glass-card neon-glow">
               <CardHeader className="pb-3">
                 <CardDescription>Total Domains</CardDescription>
                 <CardTitle className="text-3xl">{domains.length}</CardTitle>
               </CardHeader>
             </Card>
-            <Card>
+            <Card className="glass-card neon-glow">
               <CardHeader className="pb-3">
                 <CardDescription>Expiring Soon</CardDescription>
                 <CardTitle className="text-3xl text-orange-600">
@@ -193,7 +201,7 @@ export default function DashboardPage() {
                 </CardTitle>
               </CardHeader>
             </Card>
-            <Card>
+            <Card className="glass-card neon-glow">
               <CardHeader className="pb-3">
                 <CardDescription>Active Domains</CardDescription>
                 <CardTitle className="text-3xl text-green-600">
@@ -222,7 +230,7 @@ export default function DashboardPage() {
                 <AlertCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-xl font-semibold mb-2">No Domains Found</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  You don't own any .base domains yet. Register your first domain to get started!
+                  You don&apos;t own any .base domains yet. Register your first domain to get started!
                 </p>
                 <Link href="/">
                   <Button size="lg">
@@ -236,7 +244,7 @@ export default function DashboardPage() {
               {domains.map((domain) => (
                 <Card
                   key={domain.tokenId.toString()}
-                  className="hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/40"
+                  className="glass-card card-3d hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/40"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -287,7 +295,7 @@ export default function DashboardPage() {
           )}
 
           {/* Information Panel */}
-          <Card className="border-blue-500/50 bg-blue-50 dark:bg-blue-950/20">
+          <Card className="glass-card animated-border border-blue-500/50 bg-blue-50 dark:bg-blue-950/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-5 h-5" />
@@ -296,7 +304,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                We're building advanced domain management features including:
+                We&apos;re building advanced domain management features including:
               </p>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">

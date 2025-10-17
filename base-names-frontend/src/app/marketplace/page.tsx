@@ -53,7 +53,7 @@ function MarketplaceDomainCard({ domain }: { domain: typeof DEMO_DOMAINS[0] }) {
       className="h-full"
     >
       <Card className={cn(
-        "group hover:shadow-xl transition-all duration-300 border-2 h-full flex flex-col",
+        "glass-card card-3d group hover:shadow-xl transition-all duration-300 border-2 h-full flex flex-col",
         tierColors[domain.tier as keyof typeof tierColors]
       )}>
         <CardHeader className="pb-3">
@@ -79,7 +79,7 @@ function MarketplaceDomainCard({ domain }: { domain: typeof DEMO_DOMAINS[0] }) {
             </Button>
           </div>
           <div className="mt-2">
-            <CardTitle className="text-xl font-bold">{domain.domain}</CardTitle>
+            <CardTitle className="text-xl font-bold text-foreground dark:text-white">{domain.domain}</CardTitle>
             <div className="flex items-center gap-2 mt-2">
               {domain.isListed && <Badge variant="success" className="text-xs">LISTED</Badge>}
               <Badge variant="secondary" className="text-xs capitalize">{domain.category}</Badge>
@@ -112,7 +112,7 @@ function MarketplaceDomainCard({ domain }: { domain: typeof DEMO_DOMAINS[0] }) {
               </Button>
               <Button
                 size="sm"
-                className="w-full"
+                className="btn-glow w-full"
                 onClick={handleBuyNow}
                 disabled={!domain.isListed}
               >
@@ -145,34 +145,34 @@ export default function MarketplacePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Domain Marketplace</h1>
+          <h1 className="neon-glow-text text-4xl font-bold mb-2">Domain Marketplace</h1>
           <p className="text-muted-foreground">Buy, sell, and trade premium .base domains</p>
         </div>
 
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <Card className="glass-card neon-glow">
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Floor Price</p>
               <p className="text-2xl font-bold">0.001 ETH</p>
               <p className="text-xs text-green-600">Live</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass-card neon-glow">
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Total Volume</p>
               <p className="text-2xl font-bold">{totalVolume.toFixed(3)} ETH</p>
               <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass-card neon-glow">
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Listed</p>
               <p className="text-2xl font-bold">{listedCount}</p>
               <p className="text-xs text-muted-foreground">domains</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass-card neon-glow">
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">Owners</p>
               <p className="text-2xl font-bold">{DEMO_DOMAINS.length}</p>
@@ -235,7 +235,7 @@ export default function MarketplacePage() {
         </div>
 
         {/* Info Banner */}
-        <Card className="mt-8 bg-gradient-to-br from-primary/10 to-blue-600/10 border-primary/20">
+        <Card className="glass-card animated-border mt-8 bg-gradient-to-br from-primary/10 to-blue-600/10 border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShoppingBag className="h-5 w-5" />

@@ -2,19 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useReadContract, useWriteContract, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { createPublicClient, http } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
-import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, Star, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Globe, Shield, Zap, Users, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CONTRACTS, ABIS, PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING, labelHash, getContractsForChain, isSupportedChain, getNetworkName } from '@/lib/contracts';
+import { ABIS, PREMIUM_DOMAINS, labelHash, getContractsForChain, isSupportedChain, getNetworkName } from '@/lib/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { cn, formatAddress, formatPrice, formatDate, getDaysUntilExpiry } from '@/lib/utils';
+import { cn, formatAddress, formatDate, getDaysUntilExpiry } from '@/lib/utils';
 
 // Enhanced domain validation regex
 const DOMAIN_NAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
@@ -179,14 +178,17 @@ function EnhancedAnimatedBackground() {
     <div className="fixed inset-0 -z-10 overflow-hidden">
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
-      
+
+      {/* Mesh Gradient */}
+      <div className="mesh-gradient" />
+
       {/* Animated Particles */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 opacity-60"
         style={{ mixBlendMode: 'screen' }}
       />
-      
+
       {/* Floating Geometric Shapes */}
       <div className="absolute inset-0">
         {[...Array(6)].map((_, i) => (
@@ -220,19 +222,10 @@ function EnhancedAnimatedBackground() {
           </motion.div>
         ))}
       </div>
-      
-      {/* Grid Pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(0, 82, 255, 0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 82, 255, 0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-        }}
-      />
-      
+
+      {/* Cyber Grid Pattern */}
+      <div className="cyber-grid absolute inset-0 opacity-30" />
+
       {/* Radial Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-background/50" />
     </div>
@@ -252,38 +245,17 @@ function EnhancedDomainSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address, chain } = useAccount();
   const { writeContract, isPending: isRegistering, data: txHash, error: txError } = useWriteContract();
-  const { switchChain } = useSwitchChain();
 
   // Log transaction results
   useEffect(() => {
     if (txHash) {
-      console.log('');
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('📝 TRANSACTION HASH RECEIVED');
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('Transaction hash:', txHash);
-      console.log('Short hash:', txHash.slice(0, 10) + '...');
-      console.log('');
-      console.log('✅ User signed the transaction!');
-      console.log('✅ Transaction broadcast to Base Sepolia network');
-      console.log('⏳ Waiting for transaction to be included in a block...');
-      console.log('');
-      console.log('View on BaseScan:');
-      console.log(`https://sepolia.basescan.org/tx/${txHash}`);
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('');
       toast.info(`Transaction submitted: ${txHash.slice(0, 10)}...`);
     }
   }, [txHash]);
 
   useEffect(() => {
     if (txError) {
-      console.log('');
-      console.log('═══════════════════════════════════════════════════════');
       console.error('❌ TRANSACTION ERROR (User Rejected or Wallet Error)');
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('Timestamp:', new Date().toISOString());
       console.error('Error type:', txError?.constructor?.name);
       console.error('Error name:', txError?.name);
       console.error('Error message:', txError?.message);
@@ -295,87 +267,136 @@ function EnhancedDomainSearch() {
       console.error('  - Wallet locked or disconnected');
       console.error('');
       console.error('Full error object:', txError);
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('');
       toast.error(`Transaction failed: ${txError.message}`);
       setRegistrationStep('idle');
     }
   }, [txError]);
 
   // Wait for transaction receipt
-  const { data: receipt, isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { data: receipt } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
+  // Auto-proceed to registration after commitment confirms and 60s wait
+  useEffect(() => {
+    if (registrationStep === 'waiting' && waitTimeRemaining === 0 && commitmentSecret) {
+      // Automatically trigger registration
+      handleAutoRegister();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registrationStep, waitTimeRemaining, commitmentSecret]);
+
+  // Separate function for auto-registration to avoid dependency issues
+  const handleAutoRegister = async () => {
+    if (!searchTerm || !isConnected || !address || !price || !commitmentSecret) {
+      console.error('❌ Auto-registration failed: missing required data');
+      toast.error('Auto-registration failed. Please try again manually.');
+      setRegistrationStep('idle');
+      return;
+    }
+
+    const totalPrice = price[0] + price[1];
+
+    // Recompute commitment using the contract's makeCommitment function
+    const publicClient = createPublicClient({
+      chain: currentChainId === 84532 ? baseSepolia : base,
+      transport: http()
+    });
+
+    try {
+      await publicClient.readContract({
+        address: contracts.BaseController as `0x${string}`,
+        abi: ABIS.BaseController,
+        functionName: 'makeCommitment',
+        args: [
+          searchTerm,
+          address,
+          BigInt(365 * 24 * 60 * 60),
+          commitmentSecret,
+          `0x${'0'.repeat(40)}` as `0x${string}`,
+          [],
+          false,
+          `0x${'0'.repeat(64)}` as `0x${string}`,
+          BigInt(0)
+        ]
+      }) as `0x${string}`;
+
+      toast.info(`Step 2/2: Auto-registering ${searchTerm}.base...`);
+      setRegistrationStep('registering');
+
+      writeContract({
+        address: contracts.BaseController as `0x${string}`,
+        abi: ABIS.BaseController,
+        functionName: 'register',
+        args: [
+          searchTerm,
+          address,
+          BigInt(365 * 24 * 60 * 60),
+          commitmentSecret,
+          `0x${'0'.repeat(40)}` as `0x${string}`,
+          [],
+          false,
+          `0x${'0'.repeat(64)}` as `0x${string}`,
+          BigInt(0)
+        ],
+        value: totalPrice
+      });
+
+    } catch (err) {
+      console.error('❌ Auto-registration error:', err);
+      toast.error('Auto-registration failed. Please try again.');
+      setRegistrationStep('idle');
+    }
+  };
+
   useEffect(() => {
     if (receipt) {
-      console.log('');
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('📜 TRANSACTION RECEIPT RECEIVED');
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('Transaction hash:', receipt.transactionHash);
-      console.log('Block number:', receipt.blockNumber?.toString());
-      console.log('Block hash:', receipt.blockHash);
-      console.log('From:', receipt.from);
-      console.log('To:', receipt.to);
-      console.log('Gas used:', receipt.gasUsed?.toString());
-      console.log('Effective gas price:', receipt.effectiveGasPrice?.toString());
-      console.log('Status:', receipt.status);
-      console.log('');
-
       if (receipt.status === 'success') {
-        console.log('🎉 Transaction SUCCEEDED!');
-        console.log('');
-        console.log('Receipt details:');
-        console.log('  - Contract address:', receipt.contractAddress || 'N/A');
-        console.log('  - Cumulative gas used:', receipt.cumulativeGasUsed?.toString());
-        console.log('  - Logs count:', receipt.logs?.length || 0);
-        if (receipt.logs && receipt.logs.length > 0) {
-          console.log('');
-          console.log('📋 Event logs:');
-          receipt.logs.forEach((log, index) => {
-            console.log(`  Log ${index}:`, {
-              address: log.address,
-              topics: log.topics,
-              data: log.data
-            });
-          });
-        }
-        console.log('');
-
         toast.success('Transaction confirmed!');
         if (registrationStep === 'registering') {
-          console.log('✅✅✅ DOMAIN SUCCESSFULLY REGISTERED! ✅✅✅');
-          console.log(`Domain: ${searchTerm}.base`);
-          console.log('Owner:', receipt.from);
           toast.success(`Successfully registered ${searchTerm}.base!`);
+
+          // Save to localStorage for dashboard
+          try {
+            const storedDomains = localStorage.getItem('registered-domains');
+            const domains = storedDomains ? JSON.parse(storedDomains) : {};
+            const tokenId = labelHash(searchTerm);
+            domains[tokenId.toString()] = searchTerm;
+            localStorage.setItem('registered-domains', JSON.stringify(domains));
+          } catch (err) {
+            console.error('Failed to save domain to localStorage:', err);
+          }
+
           setRegistrationStep('idle');
           setCommitmentSecret(null);
           setWaitTimeRemaining(0);
         } else if (registrationStep === 'committing') {
-          console.log('✅ COMMITMENT SAVED ON-CHAIN');
-          console.log('Wait 60 seconds before completing registration');
+          toast.success('Commitment confirmed! Auto-registering in 60 seconds...');
+
+          // Start waiting period
+          setRegistrationStep('waiting');
+          setWaitTimeRemaining(60);
+
+          // Start countdown timer
+          const interval = setInterval(() => {
+            setWaitTimeRemaining(prev => {
+              if (prev <= 1) {
+                clearInterval(interval);
+                // Don't change registration step here - the useEffect will handle auto-registration
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          return () => clearInterval(interval);
         }
       } else {
-        console.log('❌❌❌ TRANSACTION REVERTED! ❌❌❌');
-        console.log('');
-        console.log('This means the contract rejected the transaction.');
-        console.log('Possible reasons:');
-        console.log('  - Commitment not found (hash mismatch)');
-        console.log('  - Commitment too new (< 60 seconds)');
-        console.log('  - Commitment too old (> 24 hours)');
-        console.log('  - Domain not available');
-        console.log('  - Insufficient payment');
-        console.log('  - Rate limit exceeded');
-        console.log('');
-        console.log('Check the transaction on BaseScan for details:');
-        console.log(`https://sepolia.basescan.org/tx/${receipt.transactionHash}`);
         toast.error('Transaction failed - it was reverted by the contract');
         setRegistrationStep('idle');
+        setCommitmentSecret(null);
+        setWaitTimeRemaining(0);
       }
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('');
     }
   }, [receipt, registrationStep, searchTerm]);
 
@@ -396,7 +417,7 @@ function EnhancedDomainSearch() {
     }
   });
 
-  const { data: price, error: priceError, isLoading: isLoadingPrice } = useReadContract({
+  const { data: price, isLoading: isLoadingPrice } = useReadContract({
     address: contracts.BaseController as `0x${string}`,
     abi: ABIS.BaseController,
     functionName: 'rentPrice',
@@ -441,7 +462,7 @@ function EnhancedDomainSearch() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       toast.success(`Searched for "${searchTerm}.base"`);
-    } catch (error) {
+    } catch {
       toast.error('Search failed. Please try again.');
     } finally {
       setIsSearching(false);
@@ -464,39 +485,17 @@ function EnhancedDomainSearch() {
     }
 
     try {
-      const totalPrice = price[0] + price[1];
-      const networkType = currentChainId === 84532 ? ' (FREE testnet)' : '';
 
       // Step 1: Make commitment
       if (!commitmentSecret) {
         // Generate secret for new registration
         const secret = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as `0x${string}`;
 
-        console.log('═══════════════════════════════════════════════════════');
-        console.log('🔐 STEP 1: MAKING COMMITMENT');
-        console.log('═══════════════════════════════════════════════════════');
-        console.log('Timestamp:', new Date().toISOString());
-        console.log('Domain:', searchTerm);
-        console.log('Owner:', address);
-        console.log('Duration:', 365 * 24 * 60 * 60, 'seconds (1 year)');
-        console.log('Secret:', secret);
-        console.log('Resolver:', '0x0000000000000000000000000000000000000000 (ZERO ADDRESS - bypasses ENS approval issue)');
-        console.log('Controller:', contracts.BaseController);
-        console.log('Registrar:', contracts.BaseRegistrar);
-        console.log('ENS Registry:', contracts.ENSRegistry);
-        console.log('Network:', networkName, `(Chain ID: ${currentChainId})`);
-        console.log('');
-        console.log('💡 Strategy: Register without resolver to avoid ens.setRecord() call');
-        console.log('   that requires ENS Registry approval.');
-
         toast.info(`Step 1/2: Making commitment...`);
         setRegistrationStep('committing');
 
         // Save the secret BEFORE making the transaction
         setCommitmentSecret(secret);
-        console.log('');
-        console.log('✅ Secret saved to state:', secret);
-        console.log('✅ State updated, registration step: committing');
 
         // Call the contract's makeCommitment function to get the CORRECT hash
         const publicClient = createPublicClient({
@@ -521,26 +520,6 @@ function EnhancedDomainSearch() {
           ]
         }) as `0x${string}`;
 
-        console.log('');
-        console.log('📝 Commitment Calculation:');
-        console.log('  - Method: Contract.makeCommitment() [CORRECT METHOD]');
-        console.log('  - Parameters:');
-        console.log('    [0] label:', searchTerm);
-        console.log('    [1] owner:', address);
-        console.log('    [2] duration:', 365 * 24 * 60 * 60);
-        console.log('    [3] secret:', secret);
-        console.log('    [4] resolver:', '0x0000000000000000000000000000000000000000');
-        console.log('    [5] data:', '[]');
-        console.log('    [6] reverseRecord:', false);
-        console.log('    [7] referrer:', '0x0000000000000000000000000000000000000000000000000000000000000000');
-        console.log('    [8] fuses:', 0);
-        console.log('  - Commitment hash (from contract):', commitment);
-        console.log('');
-        console.log('📤 Sending commit() transaction...');
-        console.log('  - To contract:', contracts.BaseController);
-        console.log('  - Function: commit(bytes32)');
-        console.log('  - Args: [', commitment, ']');
-
         writeContract({
           address: contracts.BaseController as `0x${string}`,
           abi: ABIS.BaseController,
@@ -548,176 +527,13 @@ function EnhancedDomainSearch() {
           args: [commitment],
         });
 
-        console.log('');
-        console.log('✅ commit() transaction sent to wallet for signing');
-        console.log('⏳ Waiting for user to approve transaction in wallet...');
-        console.log('═══════════════════════════════════════════════════════');
-
-        toast.success('Commitment made! Wait 60 seconds then click Register again.');
-        setRegistrationStep('waiting');
-        setWaitTimeRemaining(60);
-
-        // Start countdown
-        const interval = setInterval(() => {
-          setWaitTimeRemaining(prev => {
-            if (prev <= 1) {
-              clearInterval(interval);
-              setRegistrationStep('idle');
-              toast.success('Ready! Click Register to complete.');
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      }
-      // Step 2: Complete registration
-      else if (commitmentSecret && waitTimeRemaining === 0) {
-        console.log('═══════════════════════════════════════════════════════');
-        console.log('🚀 STEP 2: REGISTERING DOMAIN');
-        console.log('═══════════════════════════════════════════════════════');
-        console.log('Timestamp:', new Date().toISOString());
-        console.log('Domain:', searchTerm);
-        console.log('Owner:', address);
-        console.log('Duration:', 365 * 24 * 60 * 60, 'seconds (1 year)');
-        console.log('Secret (from state):', commitmentSecret);
-        console.log('Resolver:', '0x0000000000000000000000000000000000000000 (ZERO ADDRESS)');
-        console.log('Controller:', contracts.BaseController);
-        console.log('Registrar:', contracts.BaseRegistrar);
-        console.log('ENS Registry:', contracts.ENSRegistry);
-        console.log('Network:', networkName, `(Chain ID: ${currentChainId})`);
-        console.log('');
-        console.log('💡 Using zero address resolver to bypass ens.setRecord()');
-        console.log('   This avoids the ENS Registry approval requirement.');
-        console.log('');
-        console.log('💰 Payment:');
-        console.log('  - Base price:', price[0].toString(), 'wei');
-        console.log('  - Base price (ETH):', Number(price[0]) / 1e18, 'ETH');
-        console.log('  - Premium:', price[1].toString(), 'wei');
-        console.log('  - Premium (ETH):', Number(price[1]) / 1e18, 'ETH');
-        console.log('  - Total:', totalPrice.toString(), 'wei');
-        console.log('  - Total (ETH):', Number(totalPrice) / 1e18, 'ETH');
-        console.log('');
-
-        // Recompute commitment using the contract's makeCommitment function
-        const publicClient = createPublicClient({
-          chain: currentChainId === 84532 ? baseSepolia : base,
-          transport: http()
-        });
-
-        const verifyCommitment = await publicClient.readContract({
-          address: contracts.BaseController as `0x${string}`,
-          abi: ABIS.BaseController,
-          functionName: 'makeCommitment',
-          args: [
-            searchTerm,
-            address,
-            BigInt(365 * 24 * 60 * 60),
-            commitmentSecret,
-            `0x${'0'.repeat(40)}` as `0x${string}`,
-            [],
-            false,
-            `0x${'0'.repeat(64)}` as `0x${string}`,
-            BigInt(0)
-          ]
-        }) as `0x${string}`;
-
-        console.log('🔍 Commitment Verification:');
-        console.log('  - Method: Contract.makeCommitment() [CORRECT METHOD]');
-        console.log('  - Recomputed hash:', verifyCommitment);
-        console.log('  - Parameters used:');
-        console.log('    [0] label:', searchTerm);
-        console.log('    [1] owner:', address);
-        console.log('    [2] duration:', 365 * 24 * 60 * 60);
-        console.log('    [3] secret:', commitmentSecret);
-        console.log('    [4] resolver:', '0x0000000000000000000000000000000000000000');
-        console.log('    [5] data:', '[]');
-        console.log('    [6] reverseRecord:', false);
-        console.log('    [7] referrer:', '0x0000000000000000000000000000000000000000000000000000000000000000');
-        console.log('    [8] fuses:', 0);
-        console.log('  ✅ This hash MUST match the one from Step 1!');
-        console.log('');
-
-        toast.info(`Step 2/2: Completing registration on ${networkName}${networkType}...`);
-        setRegistrationStep('registering');
-
-        console.log('📝 register() Function Call Details:');
-        console.log('  - Contract address:', contracts.BaseController);
-        console.log('  - Function: register(string,address,uint256,bytes32,address,bytes[],bool,bytes32,uint256)');
-        console.log('  - Method ID: (auto-generated by viem)');
-        console.log('');
-        console.log('  Parameters:');
-        console.log('  [0] label (string):', searchTerm);
-        console.log('  [1] owner (address):', address);
-        console.log('  [2] duration (uint256):', BigInt(365 * 24 * 60 * 60).toString());
-        console.log('  [3] secret (bytes32):', commitmentSecret);
-        console.log('  [4] resolver (address):', '0x0000000000000000000000000000000000000000');
-        console.log('  [5] data (bytes[]):', '[]');
-        console.log('  [6] reverseRecord (bool):', false);
-        console.log('  [7] referrer (bytes32):', '0x0000000000000000000000000000000000000000000000000000000000000000');
-        console.log('  [8] fuses (uint256):', 0);
-        console.log('');
-        console.log('  Payment (msg.value):', totalPrice.toString(), 'wei (', Number(totalPrice) / 1e18, 'ETH)');
-        console.log('');
-        console.log('📤 Sending register() transaction to wallet...');
-
-        try {
-          writeContract({
-            address: contracts.BaseController as `0x${string}`,
-            abi: ABIS.BaseController,
-            functionName: 'register',
-            args: [
-              searchTerm,
-              address,
-              BigInt(365 * 24 * 60 * 60),
-              commitmentSecret, // Use the saved secret
-              `0x${'0'.repeat(40)}` as `0x${string}`, // NO RESOLVER - avoids ens.setRecord() call that's failing
-              [],
-              false, // reverseRecord: false
-              `0x${'0'.repeat(64)}` as `0x${string}`, // referrer: zero bytes32
-              BigInt(0) // fuses: 0
-            ],
-            value: totalPrice
-          });
-          console.log('');
-          console.log('✅ register() transaction sent to wallet for signing');
-          console.log('⏳ Waiting for user to approve transaction in wallet...');
-          console.log('');
-          console.log('🔬 What happens on-chain:');
-          console.log('  1. User signs transaction in wallet');
-          console.log('  2. Transaction broadcasts to Base Sepolia network');
-          console.log('  3. Sequencer includes transaction in block');
-          console.log('  4. Controller verifies:');
-          console.log('     - Commitment exists');
-          console.log('     - Commitment age >= 60 seconds');
-          console.log('     - Commitment age <= 86400 seconds');
-          console.log('     - Domain is available');
-          console.log('     - Payment >= price');
-          console.log('  5. Controller calls BaseRegistrar.register()');
-          console.log('  6. BaseRegistrar mints NFT to owner');
-          console.log('  7. BaseRegistrar calls ens.setSubnodeOwner()');
-          console.log('  8. Since resolver = 0x0, ens.setRecord() is SKIPPED');
-          console.log('  9. Transaction completes ✅');
-        } catch (err) {
-          console.error('');
-          console.error('❌ Error calling writeContract:');
-          console.error('  Error type:', (err as Error)?.constructor?.name);
-          console.error('  Error message:', (err as Error)?.message);
-          console.error('  Full error:', err);
-          throw err;
-        }
-        console.log('');
-        console.log('═══════════════════════════════════════════════════════');
-
-        // Don't reset state here - wait for transaction confirmation
+        // Commitment transaction will be sent, and after confirmation,
+        // we'll automatically start the 60-second countdown and then auto-register
       } else if (waitTimeRemaining > 0) {
-        console.log('⏳ Still waiting:', waitTimeRemaining, 'seconds');
-        toast.info(`Please wait ${waitTimeRemaining} more seconds before completing registration...`);
+        toast.info(`Auto-registering in ${waitTimeRemaining} seconds...`);
       } else {
-        console.log('❓ Unexpected state:', {
-          hasSecret: !!commitmentSecret,
-          waitTime: waitTimeRemaining,
-          step: registrationStep
-        });
+        toast.error('Unexpected state. Please refresh and try again.');
+        setRegistrationStep('idle');
       }
     } catch (error) {
       toast.error('Registration failed. Please try again.');
@@ -776,7 +592,7 @@ function EnhancedDomainSearch() {
         transition={{ duration: 0.6 }}
         className="relative"
       >
-        <Card className="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl">
+        <Card className="glass-card neon-glow relative overflow-hidden border-2 border-primary/20 shadow-2xl">
           {/* Animated background */}
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-primary/10 via-blue-500/5 to-transparent opacity-0"
@@ -980,18 +796,36 @@ function EnhancedDomainSearch() {
                   >
                     <Button
                       onClick={handleRegister}
-                      disabled={isRegistering || !price}
+                      disabled={isRegistering || !price || registrationStep !== 'idle'}
                       size="lg"
-                      className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
+                      className="pulse-glow btn-glow w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
                     >
-                      {isRegistering ? (
+                      {registrationStep === 'committing' ? (
                         <motion.span
                           animate={{ rotate: 360 }}
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           className="flex items-center gap-2"
                         >
                           <Loader2 className="h-4 w-4" />
-                          Registering...
+                          Step 1/2: Committing...
+                        </motion.span>
+                      ) : registrationStep === 'waiting' ? (
+                        <motion.span
+                          animate={{ scale: [1, 1.02, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Step 2/2: Auto-registering in {waitTimeRemaining}s...
+                        </motion.span>
+                      ) : registrationStep === 'registering' ? (
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="flex items-center gap-2"
+                        >
+                          <Loader2 className="h-4 w-4" />
+                          Step 2/2: Registering...
                         </motion.span>
                       ) : (
                         <motion.span
@@ -1000,7 +834,7 @@ function EnhancedDomainSearch() {
                           transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
                           <Sparkles className="h-4 w-4" />
-                          Register Now
+                          Register Now (One-Click)
                           <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                         </motion.span>
                       )}
@@ -1077,7 +911,7 @@ function EnhancedPremiumDomainCard({ domain, index }: { domain: string; index: n
       setCopied(true);
       toast.success('Address copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error('Failed to copy address');
     }
   };
@@ -1120,12 +954,12 @@ function EnhancedPremiumDomainCard({ domain, index }: { domain: string; index: n
       role="article"
       aria-label={`Premium domain ${domain}.base`}
     >
-      <Card className="group relative overflow-hidden border-2 border-primary/20 hover:border-primary/40 bg-gradient-to-br from-background via-background to-primary/5 transition-all duration-500">
+      <Card className="glass-card card-3d animated-border group relative overflow-hidden border-2 border-primary/20 hover:border-primary/40 transition-all duration-500">
         {/* Animated background gradient */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-primary/10 via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100"
+          className="holographic absolute inset-0 bg-gradient-to-br from-primary/10 via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100"
           animate={{
-            background: isHovered 
+            background: isHovered
               ? "linear-gradient(135deg, rgba(0, 82, 255, 0.1), rgba(0, 212, 255, 0.05), transparent)"
               : "linear-gradient(135deg, transparent, transparent, transparent)"
           }}
@@ -1357,7 +1191,7 @@ function EnhancedPremiumDomainCard({ domain, index }: { domain: string; index: n
                 <Button
                   variant="default"
                   size="lg"
-                  className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 font-semibold text-white shadow-lg hover:shadow-xl transition-all focus-visible:ring-2 focus-visible:ring-primary group"
+                  className="pulse-glow btn-glow w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 font-semibold text-white shadow-lg hover:shadow-xl transition-all focus-visible:ring-2 focus-visible:ring-primary group"
                   onClick={handleRegisterClick}
                   aria-label={`Register ${domain}.base domain now`}
                 >
@@ -1396,8 +1230,8 @@ function EnhancedHeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <motion.h1 
-            className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6"
+          <motion.h1
+            className="neon-text text-4xl sm:text-6xl lg:text-7xl font-bold mb-6"
             animate={{
               backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
             }}
@@ -1431,7 +1265,7 @@ function EnhancedHeroSection() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all group"
+                className="btn-glow neon-glow bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all group"
                 onClick={() => {
                   document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' });
                 }}
@@ -1442,12 +1276,12 @@ function EnhancedHeroSection() {
                 </span>
               </Button>
             </motion.div>
-            
+
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-primary/50 hover:border-primary text-primary hover:bg-primary/10 font-semibold px-8 py-4 text-lg transition-all"
+                className="frosted-button border-2 border-primary/50 hover:border-primary text-primary hover:bg-primary/10 font-semibold px-8 py-4 text-lg transition-all"
                 onClick={() => {
                   document.getElementById('premium-domains')?.scrollIntoView({ behavior: 'smooth' });
                 }}
@@ -1556,12 +1390,12 @@ export default function EnhancedHomePage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -10 }}
-                className="text-center p-6 rounded-xl bg-gradient-to-br from-background to-muted/20 border border-border/50 hover:border-primary/50 transition-all duration-300"
+                className="glass-card text-center p-6 rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300"
               >
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mb-4"
+                  className="neon-glow inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mb-4"
                 >
                   <feature.icon className="w-6 h-6 text-primary" />
                 </motion.div>

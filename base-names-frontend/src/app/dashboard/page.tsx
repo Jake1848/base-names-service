@@ -141,7 +141,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
 
 export default function DashboardPage() {
   const { address, isConnected, chainId } = useAccount();
-  const { domains, loading, error } = useDomainOwnership();
+  const { domains, loading } = useDomainOwnership();
 
   if (!isConnected) {
     return (

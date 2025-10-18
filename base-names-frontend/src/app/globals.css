@@ -96,7 +96,7 @@
   --secondary: oklch(0.18 0.04 264);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.18 0.04 264);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted-foreground: oklch(0.85 0 0);
   /* Enhanced accent with Coinbase blue */
   --accent: oklch(0.55 0.2 264);
   --accent-foreground: oklch(0.985 0 0);
@@ -129,5 +129,17 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Ensure input text is visible in dark mode */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    color: oklch(0.985 0 0);
+  }
+
+  /* Ensure all text on cards is visible */
+  .dark [class*="card"] {
+    color: oklch(0.985 0 0);
   }
 }

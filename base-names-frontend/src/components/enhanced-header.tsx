@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Menu, X, Globe, TrendingUp, ShoppingBag, FileText, HelpCircle, Sun, Moon, Sparkles, LayoutDashboard, Gavel, Building2, ArrowLeftRight, Coins } from 'lucide-react';
+import { Menu, X, Globe, TrendingUp, ShoppingBag, Sun, Moon, Sparkles, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';

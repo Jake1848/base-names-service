@@ -14,22 +14,60 @@ import { toast } from 'sonner';
 // Chart colors
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
+interface RegistrationEvent {
+  timestamp: number;
+  domain: string;
+  blockNumber?: bigint;
+  transactionHash?: string;
+}
+
 // Generate real chart data from blockchain events
-function generateChartData(events: any[], totalRegistered: number, totalRevenue: number) {
-  // Create trend data based on real registrations
+function generateChartData(events: RegistrationEvent[], totalRegistered: number, totalRevenue: number) {
+  // Create trend data based on real registrations distributed across months
+  // Group events by month from timestamps
+  const monthlyData: Record<string, { registrations: number; revenue: number }> = {};
+
+  events.forEach(event => {
+    if (event.timestamp) {
+      const date = new Date(event.timestamp);
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { registrations: 0, revenue: 0 };
+      }
+      monthlyData[monthKey].registrations += 1;
+      // Revenue will be distributed proportionally based on registration count
+    }
+  });
+
+  // Distribute REAL total revenue proportionally across months based on registration counts
+  const totalMonthlyRegistrations = Object.values(monthlyData).reduce((sum, data) => sum + data.registrations, 0);
+
+  if (totalMonthlyRegistrations > 0 && totalRevenue > 0) {
+    Object.keys(monthlyData).forEach(monthKey => {
+      const registrationCount = monthlyData[monthKey].registrations;
+      // Proportional distribution: (month registrations / total registrations) × total revenue
+      monthlyData[monthKey].revenue = (registrationCount / totalMonthlyRegistrations) * totalRevenue;
+    });
+  }
+
+  // Create last 6 months array with real data
   const now = new Date();
   const months = [];
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const monthLabel = date.toLocaleDateString('en-US', { month: 'short' });
+
     months.push({
-      month: date.toLocaleDateString('en-US', { month: 'short' }),
-      registrations: Math.floor(totalRegistered / 6) + Math.floor(Math.random() * 10),
-      revenue: (totalRevenue / 6) + (Math.random() * 0.5),
+      month: monthLabel,
+      registrations: monthlyData[monthKey]?.registrations || 0,
+      revenue: monthlyData[monthKey]?.revenue || 0,
     });
   }
 
   // Domain categories from registration events
-  const categories = events.reduce((acc: any, event: any) => {
+  const categories = events.reduce((acc: Record<string, number>, event) => {
     const domain = event.domain?.split('.')[0] || '';
     let category = 'other';
 
@@ -117,24 +155,42 @@ function useAnalyticsData() {
   const pricingData = useDomainPricing();
   const { events: registrationEvents } = useRegistrationEvents();
 
+  // Calculate real growth from blockchain events
+  const now = Date.now();
+  const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+
+  const recentEvents = registrationEvents.filter(e => e.timestamp >= thirtyDaysAgo);
+  const olderEvents = registrationEvents.filter(e => e.timestamp < thirtyDaysAgo);
+
+  const domainsGrowth = olderEvents.length > 0
+    ? ((recentEvents.length - olderEvents.length) / olderEvents.length) * 100
+    : 0;
+
+  // Calculate revenue growth from REAL total revenue proportionally distributed
+  const totalEvents = registrationEvents.length;
+  const recentRevenue = totalEvents > 0 ? (recentEvents.length / totalEvents) * registrationStats.totalRevenue : 0;
+  const olderRevenue = totalEvents > 0 ? (olderEvents.length / totalEvents) * registrationStats.totalRevenue : 0;
+  const revenueGrowth = olderRevenue > 0
+    ? ((recentRevenue - olderRevenue) / olderRevenue) * 100
+    : 0;
+
   return {
     totalDomains: registrationStats.totalRegistered || 0,
     totalRevenue: registrationStats.totalRevenue || 0,
     averagePrice: pricingData.basePrice || 0.05,
-    totalUsers: Math.floor((registrationStats.totalRegistered || 0) * 0.8),
+    totalUsers: registrationStats.totalRegistered || 0, // 1 domain = 1 user (accurate count)
     growth: {
-      // Calculate growth from recent vs older events
-      domains: registrationEvents.length > 0 ? 25.5 : 0,
-      revenue: marketplaceData.totalVolume > 0 ? 32.1 : 0,
-      users: registrationStats.totalRegistered > 0 ? 18.9 : 0
+      domains: domainsGrowth,
+      revenue: revenueGrowth,
+      users: domainsGrowth // User growth follows domain growth
     },
     registrationsByCategory: registrationStats.registrationsByCategory || {},
     marketplaceVolume: marketplaceData.totalVolume || 0,
-    floorPrice: marketplaceData.floorPrice || 0.01,
+    floorPrice: marketplaceData.floorPrice || 0,
     recentRegistrations: registrationEvents.slice(0, 5),
     recentSales: marketplaceData.recentSales || [],
     events: registrationEvents,
-    loading: marketplaceData.loading,
+    loading: registrationStats.loading || marketplaceData.loading || pricingData.loading,
   };
 }
 
@@ -281,7 +337,7 @@ export default function AnalyticsPage() {
                   <StatCard
                     title="Average Price"
                     value={analyticsData.averagePrice}
-                    change={5.2}
+                    change={0} // Price is fixed at 0.05 ETH, so no change
                     icon={TrendingUp}
                     format="currency"
                   />
@@ -568,7 +624,9 @@ export default function AnalyticsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <h3 className="text-lg font-semibold mb-2">Growth Rate</h3>
-                  <p className="text-3xl font-bold text-green-600">+25.5%</p>
+                  <p className={`text-3xl font-bold ${analyticsData.growth.domains >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {analyticsData.growth.domains >= 0 ? '+' : ''}{analyticsData.growth.domains.toFixed(1)}%
+                  </p>
                   <p className="text-sm text-muted-foreground">Monthly registrations</p>
                 </div>
                 <div className="text-center">
@@ -577,9 +635,9 @@ export default function AnalyticsPage() {
                   <p className="text-sm text-muted-foreground">Total trading volume</p>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-2">Conversion</h3>
-                  <p className="text-3xl font-bold text-purple-600">12.8%</p>
-                  <p className="text-sm text-muted-foreground">Search to registration</p>
+                  <h3 className="text-lg font-semibold mb-2">Total Domains</h3>
+                  <p className="text-3xl font-bold text-purple-600">{analyticsData.totalDomains}</p>
+                  <p className="text-sm text-muted-foreground">Registered on-chain</p>
                 </div>
               </div>
             </CardContent>

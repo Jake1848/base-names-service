@@ -1,0 +1,80 @@
+{
+  "name": "Base Names Service",
+  "short_name": "Base Names",
+  "description": "Decentralized domain names on Base L2 - Your identity on the blockchain",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0F1E",
+  "theme_color": "#0052FF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "finance", "productivity"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "375x812",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Register Domain",
+      "short_name": "Register",
+      "description": "Register a new .base domain",
+      "url": "/",
+      "icons": [{ "src": "/favicon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Domains",
+      "short_name": "Dashboard",
+      "description": "View and manage your domains",
+      "url": "/dashboard",
+      "icons": [{ "src": "/favicon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Marketplace",
+      "short_name": "Market",
+      "description": "Browse available domains",
+      "url": "/marketplace",
+      "icons": [{ "src": "/favicon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

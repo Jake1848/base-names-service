@@ -2,18 +2,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import {
   HelpCircle,
-  Search,
-  Wallet,
   CreditCard,
   Shield,
   MessageCircle,
   Mail,
   ExternalLink,
-  AlertTriangle,
-  CheckCircle
+  AlertTriangle
 } from 'lucide-react';
+import { CONTRACTS } from '@/lib/contracts';
 
 export default function HelpPage() {
+  // Get REAL contract addresses from deployed contracts
+  const realContracts = CONTRACTS.BASE_MAINNET.contracts;
+
   const faqs = [
     {
       category: "Getting Started",
@@ -93,7 +94,7 @@ export default function HelpPage() {
     {
       title: "Smart Contracts",
       description: "View verified contracts on Basescan",
-      href: "https://basescan.org/address/0xca7FD90f4C76FbCdbdBB3427804374b16058F55e",
+      href: `https://basescan.org/address/${realContracts.BaseController}`,
       icon: ExternalLink
     },
     {
@@ -120,7 +121,7 @@ export default function HelpPage() {
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-4">Help Center</h1>
+        <h1 className="text-4xl font-bold mb-4 text-foreground dark:text-white">Help Center</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Find answers to common questions and get support for Base Names registration and management.
         </p>
@@ -135,7 +136,7 @@ export default function HelpPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-2">
                   <Icon className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">{resource.title}</CardTitle>
+                  <CardTitle className="text-lg text-foreground dark:text-white">{resource.title}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -156,7 +157,7 @@ export default function HelpPage() {
 
       {/* FAQs */}
       <div className="space-y-8">
-        <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+        <h2 className="text-3xl font-bold text-center mb-8 text-foreground dark:text-white">Frequently Asked Questions</h2>
 
         {faqs.map((category) => {
           const Icon = category.icon;
@@ -164,7 +165,7 @@ export default function HelpPage() {
             <div key={category.category}>
               <div className="flex items-center space-x-2 mb-6">
                 <Icon className="h-6 w-6 text-primary" />
-                <h3 className="text-2xl font-semibold">{category.category}</h3>
+                <h3 className="text-2xl font-semibold text-foreground dark:text-white">{category.category}</h3>
                 <Badge variant="outline">{category.questions.length} questions</Badge>
               </div>
 
@@ -174,12 +175,12 @@ export default function HelpPage() {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-start space-x-2">
                         <span className="text-primary text-xl">Q:</span>
-                        <span>{item.q}</span>
+                        <span className="text-foreground dark:text-white">{item.q}</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-start space-x-2">
-                        <span className="text-green-600 text-xl font-semibold">A:</span>
+                        <span className="text-green-600 dark:text-green-400 text-xl font-semibold">A:</span>
                         <p className="text-muted-foreground">{item.a}</p>
                       </div>
                     </CardContent>

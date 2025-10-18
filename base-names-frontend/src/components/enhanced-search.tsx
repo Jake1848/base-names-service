@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useAccount, useReadContract, useWriteContract, useSwitchChain } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { Search, Loader2, CheckCircle, XCircle, AlertCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { CONTRACTS, ABIS, labelHash } from '@/lib/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 // Enhanced domain validation regex
@@ -72,7 +71,6 @@ export function EnhancedDomainSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address, chain } = useAccount();
   const { writeContract, isPending: isRegistering } = useWriteContract();
-  const { switchChain } = useSwitchChain();
 
   const tokenId = searchTerm && !validationError ? labelHash(searchTerm) : null;
 
@@ -86,7 +84,7 @@ export function EnhancedDomainSearch() {
     }
   });
 
-  const { data: price, error: priceError, isLoading: isLoadingPrice } = useReadContract({
+  const { data: price, isLoading: isLoadingPrice } = useReadContract({
     address: CONTRACTS.BASE_MAINNET.contracts.BaseController as `0x${string}`,
     abi: ABIS.BaseController,
     functionName: 'rentPrice',
@@ -131,7 +129,7 @@ export function EnhancedDomainSearch() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       toast.success(`Searched for "${searchTerm}.base"`);
-    } catch (error) {
+    } catch {
       toast.error('Search failed. Please try again.');
     } finally {
       setIsSearching(false);
@@ -176,9 +174,8 @@ export function EnhancedDomainSearch() {
         ],
         value: totalPrice
       });
-    } catch (error) {
+    } catch {
       toast.error('Registration failed. Please try again.');
-      console.error('Registration error:', error);
     }
   };
 

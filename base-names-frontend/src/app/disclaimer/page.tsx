@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, ExternalLink, Shield, Info } from 'lucide-react';
+import { AlertTriangle, Shield, Info } from 'lucide-react';
 
 export default function DisclaimerPage() {
   return (

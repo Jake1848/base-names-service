@@ -5,16 +5,15 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useReadContract, useWriteContract, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 import { createPublicClient, http } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
-import { Search, Globe, Shield, Zap, Users, TrendingUp, ExternalLink, Copy, Check, AlertCircle, RefreshCw, Sparkles, Star, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Globe, Shield, Zap, Users, ExternalLink, Copy, Check, AlertCircle, Sparkles, ArrowRight, ChevronDown, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CONTRACTS, ABIS, PREMIUM_DOMAINS, PREMIUM_DOMAINS_CATEGORIES, getDomainTier, DOMAIN_PRICING, labelHash, getContractsForChain, isSupportedChain, getNetworkName } from '@/lib/contracts';
+import { ABIS, PREMIUM_DOMAINS, labelHash, getContractsForChain, isSupportedChain, getNetworkName } from '@/lib/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { cn, formatAddress, formatPrice, formatDate, getDaysUntilExpiry } from '@/lib/utils';
+import { cn, formatAddress, formatDate, getDaysUntilExpiry } from '@/lib/utils';
 
 // Enhanced domain validation regex
 const DOMAIN_NAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
@@ -252,7 +251,7 @@ function EnhancedDomainSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address, chain } = useAccount();
   const { writeContract, isPending: isRegistering, data: txHash, error: txError } = useWriteContract();
-  const { switchChain } = useSwitchChain();
+  useSwitchChain();
 
   // Log transaction results
   useEffect(() => {
@@ -303,7 +302,7 @@ function EnhancedDomainSearch() {
   }, [txError]);
 
   // Wait for transaction receipt
-  const { data: receipt, isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { data: receipt } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
@@ -396,7 +395,7 @@ function EnhancedDomainSearch() {
     }
   });
 
-  const { data: price, error: priceError, isLoading: isLoadingPrice } = useReadContract({
+  const { data: price, isLoading: isLoadingPrice } = useReadContract({
     address: contracts.BaseController as `0x${string}`,
     abi: ABIS.BaseController,
     functionName: 'rentPrice',
@@ -441,7 +440,7 @@ function EnhancedDomainSearch() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       toast.success(`Searched for "${searchTerm}.base"`);
-    } catch (error) {
+    } catch {
       toast.error('Search failed. Please try again.');
     } finally {
       setIsSearching(false);
@@ -1077,7 +1076,7 @@ function EnhancedPremiumDomainCard({ domain, index }: { domain: string; index: n
       setCopied(true);
       toast.success('Address copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error('Failed to copy address');
     }
   };

@@ -22,12 +22,22 @@
  * ```
  */
 
-import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther, Address, Hash, keccak256, toHex } from 'viem';
+import { createPublicClient, createWalletClient, custom, http, formatEther, parseEther, Address, Hash, keccak256, toHex } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyPublicClient = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyWalletClient = any;
+
+// EIP-1193 Provider interface
+interface EIP1193Provider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+}
 
 export interface SDKConfig {
   chainId: number;
-  provider?: any; // EIP-1193 provider (window.ethereum)
+  provider?: EIP1193Provider;
   rpcUrl?: string;
 }
 
@@ -122,8 +132,8 @@ const CONTROLLER_ABI = [
 
 export class BaseNamesSDK {
   private config: SDKConfig;
-  private publicClient: any;
-  private walletClient: any;
+  private publicClient: AnyPublicClient;
+  private walletClient: AnyWalletClient | undefined;
 
   // Contract addresses
   private readonly CONTRACTS = {
@@ -293,7 +303,8 @@ export class BaseNamesSDK {
     /**
      * Get listing information for a domain
      */
-    getListing: async (tokenId: bigint): Promise<ListingInfo | null> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getListing: async (_tokenId: bigint): Promise<ListingInfo | null> => {
       // Would query marketplace contract
       // Placeholder for now
       return null;
@@ -302,7 +313,8 @@ export class BaseNamesSDK {
     /**
      * List a domain for sale
      */
-    createListing: async (tokenId: bigint, price: bigint): Promise<Hash> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    createListing: async (_tokenId: bigint, _price: bigint): Promise<Hash> => {
       if (!this.walletClient) {
         throw new Error('Wallet client not initialized');
       }
@@ -314,7 +326,8 @@ export class BaseNamesSDK {
     /**
      * Buy a listed domain
      */
-    buyListing: async (tokenId: bigint): Promise<Hash> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    buyListing: async (_tokenId: bigint): Promise<Hash> => {
       if (!this.walletClient) {
         throw new Error('Wallet client not initialized');
       }
@@ -331,7 +344,8 @@ export class BaseNamesSDK {
     /**
      * Get auction information for a domain
      */
-    getAuction: async (tokenId: bigint): Promise<AuctionInfo | null> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getAuction: async (_tokenId: bigint): Promise<AuctionInfo | null> => {
       // Would query marketplace contract
       // Placeholder for now
       return null;
@@ -340,7 +354,8 @@ export class BaseNamesSDK {
     /**
      * Create an auction for a domain
      */
-    createAuction: async (tokenId: bigint, startPrice: bigint, durationInHours: number): Promise<Hash> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    createAuction: async (_tokenId: bigint, _startPrice: bigint, _durationInHours: number): Promise<Hash> => {
       if (!this.walletClient) {
         throw new Error('Wallet client not initialized');
       }
@@ -352,7 +367,8 @@ export class BaseNamesSDK {
     /**
      * Place a bid on an auction
      */
-    placeBid: async (tokenId: bigint, bidAmount: bigint): Promise<Hash> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    placeBid: async (_tokenId: bigint, _bidAmount: bigint): Promise<Hash> => {
       if (!this.walletClient) {
         throw new Error('Wallet client not initialized');
       }

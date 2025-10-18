@@ -93,7 +93,33 @@ The bug bounty program covers:
 
 ## Known Issues
 
-### Acknowledged Risks
+### Frontend Security Issues
+
+#### Low Severity: fast-redact Prototype Pollution (GHSA-ffrw-9mx8-89p8)
+
+**Status:** Monitored, awaiting upstream fix
+**Severity:** Low
+**Affected Component:** WalletConnect logger dependency chain
+**Impact:** Limited - affects logging library in WalletConnect libraries
+
+**Details:**
+- 19 low severity vulnerabilities exist in the `fast-redact` package used by WalletConnect's logging library
+- These vulnerabilities are in a deep dependency chain: fast-redact → pino → @walletconnect/logger
+- The fix requires downgrading wagmi to v1.4.13, which would be a breaking change
+- Current versions are: wagmi@2.17.5, @rainbow-me/rainbowkit@2.2.8
+
+**Mitigation:**
+- The vulnerability is in the logging component, not core wallet functionality
+- Prototype pollution attacks are difficult to exploit in a typical web3 application context
+- We are using the latest stable versions of wagmi and RainbowKit
+- We monitor for security updates to WalletConnect libraries
+
+**Action Plan:**
+- Continue monitoring npm audit for security updates
+- Update WalletConnect libraries when fixed versions are available
+- Review wagmi changelog for mentions of this fix
+
+### Acknowledged Smart Contract Risks
 
 1. **Normalization Policy**: Currently enforces on-chain ASCII validation. Unicode normalization handled off-chain.
 2. **Upgrade Strategy**: Contracts are non-upgradeable by design. Migration would require new deployment.

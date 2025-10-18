@@ -1,6 +1,6 @@
 import { useWriteContract, useReadContract, useAccount } from 'wagmi';
 import { parseEther } from 'viem';
-import { CONTRACTS, ABIS, labelHash } from '@/lib/contracts';
+import { CONTRACTS, ABIS } from '@/lib/contracts';
 import { toast } from 'sonner';
 
 export function useMarketplace() {
@@ -26,10 +26,11 @@ export function useMarketplace() {
       });
 
       return hash;
-    } catch (error: any) {
+    } catch (error) {
       console.error('List domain error:', error);
+      const message = error instanceof Error ? error.message : 'Please try again';
       toast.error('Failed to list domain', {
-        description: error?.message || 'Please try again',
+        description: message,
       });
       throw error;
     }
@@ -51,10 +52,11 @@ export function useMarketplace() {
       });
 
       return hash;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Buy domain error:', error);
+      const message = error instanceof Error ? error.message : 'Please try again';
       toast.error('Failed to purchase domain', {
-        description: error?.message || 'Please try again',
+        description: message,
       });
       throw error;
     }
@@ -75,10 +77,11 @@ export function useMarketplace() {
       });
 
       return hash;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Cancel listing error:', error);
+      const message = error instanceof Error ? error.message : 'Please try again';
       toast.error('Failed to cancel listing', {
-        description: error?.message || 'Please try again',
+        description: message,
       });
       throw error;
     }
@@ -110,10 +113,11 @@ export function useMarketplace() {
       });
 
       return hash;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Approve error:', error);
+      const message = error instanceof Error ? error.message : 'Please try again';
       toast.error('Failed to approve marketplace', {
-        description: error?.message || 'Please try again',
+        description: message,
       });
       throw error;
     }

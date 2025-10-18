@@ -4,16 +4,17 @@ import {
   FileText,
   Code,
   Globe,
-  Wallet,
   Shield,
   ExternalLink,
   Copy,
-  CheckCircle,
-  AlertTriangle,
   Info
 } from 'lucide-react';
+import { CONTRACTS } from '@/lib/contracts';
 
 export default function DocsPage() {
+  // Get REAL contract addresses from deployed contracts (not mock data)
+  const realContracts = CONTRACTS.BASE_MAINNET.contracts;
+
   const sections = [
     {
       title: "Getting Started",
@@ -38,7 +39,7 @@ export default function DocsPage() {
         {
           title: "Contract Addresses",
           description: "Official verified contracts on Base Mainnet",
-          content: `BaseController: 0xca7FD90f4C76FbCdbdBB3427804374b16058F55e\nBaseRegistrar: 0xD158de26c787ABD1E0f2955C442fea9d4DC0a917\nENSRegistry: 0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E\nPublicResolver: 0x[address_here]`
+          content: `BaseController: ${realContracts.BaseController}\nBaseRegistrar: ${realContracts.BaseRegistrar}\nENSRegistry: ${realContracts.ENSRegistry}\nPublicResolver: ${realContracts.PublicResolver}\nMarketplace: ${realContracts.DomainMarketplace}`
         },
         {
           title: "Registration Flow",
@@ -81,12 +82,16 @@ export default function DocsPage() {
     }
   ];
 
+  // Use REAL deployed contract addresses (not mock data)
   const contractAddresses = [
-    { name: 'BaseController', address: '0xca7FD90f4C76FbCdbdBB3427804374b16058F55e', description: 'Main registration contract' },
-    { name: 'BaseRegistrar', address: '0xD158de26c787ABD1E0f2955C442fea9d4DC0a917', description: 'NFT contract for domains' },
-    { name: 'ENSRegistry', address: '0x5f0C3a1d7B285262cce8D8716bf9718feA6D0f9E', description: 'Name registry contract' },
+    { name: 'BaseController', address: realContracts.BaseController, description: 'Main registration contract' },
+    { name: 'BaseRegistrar', address: realContracts.BaseRegistrar, description: 'NFT contract for domains' },
+    { name: 'ENSRegistry', address: realContracts.ENSRegistry, description: 'Name registry contract' },
+    { name: 'PublicResolver', address: realContracts.PublicResolver, description: 'Address resolution contract' },
+    { name: 'DomainMarketplace', address: realContracts.DomainMarketplace, description: 'Domain trading marketplace' },
   ];
 
+  // Code examples with REAL contract addresses
   const codeExamples = [
     {
       title: "Check Domain Availability",
@@ -100,7 +105,7 @@ const client = createPublicClient({
 });
 
 const isAvailable = await client.readContract({
-  address: '0xD158de26c787ABD1E0f2955C442fea9d4DC0a917',
+  address: '${realContracts.BaseRegistrar}',
   abi: registrarAbi,
   functionName: 'available',
   args: [labelHash('mydomain')]
@@ -110,7 +115,7 @@ const isAvailable = await client.readContract({
       title: "Register Domain",
       language: "javascript",
       code: `const { request } = await client.simulateContract({
-  address: '0xca7FD90f4C76FbCdbdBB3427804374b16058F55e',
+  address: '${realContracts.BaseController}',
   abi: controllerAbi,
   functionName: 'register',
   args: [
@@ -118,12 +123,13 @@ const isAvailable = await client.readContract({
     '0x...',                      // owner
     BigInt(365 * 24 * 60 * 60),   // duration (1 year)
     '0x0000...',                  // secret
-    '0x...',                      // resolver
+    '${realContracts.PublicResolver}', // resolver
     [],                           // data
-    true,                         // reverseRecord
-    0                             // ownerControlledFuses
+    false,                        // reverseRecord
+    '0x0000...',                  // referrer
+    0                             // fuses
   ],
-  value: parseEther('0.01')       // payment
+  value: parseEther('0.05')       // payment (0.05 ETH for standard domains)
 });
 
 await walletClient.writeContract(request);`
@@ -134,7 +140,7 @@ await walletClient.writeContract(request);`
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-4">Documentation</h1>
+        <h1 className="text-4xl font-bold mb-4 text-foreground dark:text-white">Documentation</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Complete technical documentation for integrating with Base Names Service.
         </p>
@@ -157,11 +163,11 @@ await walletClient.writeContract(request);`
             {contractAddresses.map((contract) => (
               <div key={contract.name} className="flex items-center justify-between p-3 bg-background rounded-lg border">
                 <div>
-                  <p className="font-semibold">{contract.name}</p>
+                  <p className="font-semibold text-foreground dark:text-white">{contract.name}</p>
                   <p className="text-sm text-muted-foreground">{contract.description}</p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
+                  <code className="bg-muted px-2 py-1 rounded text-sm font-mono text-foreground dark:text-white">
                     {contract.address}
                   </code>
                   <button className="p-1 hover:bg-muted rounded">
@@ -190,18 +196,18 @@ await walletClient.writeContract(request);`
             <div key={section.title}>
               <div className="flex items-center space-x-2 mb-6">
                 <Icon className="h-6 w-6 text-primary" />
-                <h2 className="text-3xl font-bold">{section.title}</h2>
+                <h2 className="text-3xl font-bold text-foreground dark:text-white">{section.title}</h2>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
                 {section.cards.map((card, index) => (
                   <Card key={index}>
                     <CardHeader>
-                      <CardTitle className="text-xl">{card.title}</CardTitle>
+                      <CardTitle className="text-xl text-foreground dark:text-white">{card.title}</CardTitle>
                       <CardDescription>{card.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <pre className="whitespace-pre-line text-sm text-muted-foreground leading-relaxed">
+                      <pre className="whitespace-pre-line text-sm text-foreground dark:text-gray-300 leading-relaxed">
                         {card.content}
                       </pre>
                     </CardContent>
@@ -215,7 +221,7 @@ await walletClient.writeContract(request);`
 
       {/* Code Examples */}
       <div className="mt-12">
-        <h2 className="text-3xl font-bold mb-6 flex items-center space-x-2">
+        <h2 className="text-3xl font-bold mb-6 flex items-center space-x-2 text-foreground dark:text-white">
           <Code className="h-6 w-6 text-primary" />
           <span>Code Examples</span>
         </h2>
@@ -224,14 +230,14 @@ await walletClient.writeContract(request);`
           {codeExamples.map((example, index) => (
             <Card key={index}>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between text-foreground dark:text-white">
                   <span>{example.title}</span>
                   <Badge variant="outline">{example.language}</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{example.code}</code>
+                <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm text-foreground dark:text-gray-300">
+                  <code className="text-foreground dark:text-gray-300">{example.code}</code>
                 </pre>
               </CardContent>
             </Card>
@@ -256,7 +262,7 @@ await walletClient.writeContract(request);`
               className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors"
             >
               <div>
-                <p className="font-semibold">Base Documentation</p>
+                <p className="font-semibold text-foreground dark:text-white">Base Documentation</p>
                 <p className="text-sm text-muted-foreground">Official Base L2 docs</p>
               </div>
               <ExternalLink className="h-4 w-4" />
@@ -269,7 +275,7 @@ await walletClient.writeContract(request);`
               className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors"
             >
               <div>
-                <p className="font-semibold">Viem Documentation</p>
+                <p className="font-semibold text-foreground dark:text-white">Viem Documentation</p>
                 <p className="text-sm text-muted-foreground">TypeScript interface for Ethereum</p>
               </div>
               <ExternalLink className="h-4 w-4" />
@@ -282,7 +288,7 @@ await walletClient.writeContract(request);`
               className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors"
             >
               <div>
-                <p className="font-semibold">Wagmi Documentation</p>
+                <p className="font-semibold text-foreground dark:text-white">Wagmi Documentation</p>
                 <p className="text-sm text-muted-foreground">React hooks for Ethereum</p>
               </div>
               <ExternalLink className="h-4 w-4" />
@@ -293,7 +299,7 @@ await walletClient.writeContract(request);`
               className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted transition-colors"
             >
               <div>
-                <p className="font-semibold">Help Center</p>
+                <p className="font-semibold text-foreground dark:text-white">Help Center</p>
                 <p className="text-sm text-muted-foreground">FAQs and user guides</p>
               </div>
               <Info className="h-4 w-4" />

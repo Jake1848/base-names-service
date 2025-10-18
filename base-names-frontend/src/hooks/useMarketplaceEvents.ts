@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAccount, useWatchContractEvent } from 'wagmi';
-import { CONTRACTS, ABIS } from '@/lib/contracts';
+import { CONTRACTS } from '@/lib/contracts';
 import { toast } from 'sonner';
 
 export interface MarketplaceEvent {
@@ -37,8 +37,13 @@ export function useMarketplaceEvents() {
     ],
     eventName: 'Listed',
     onLogs(logs) {
-      logs.forEach((log: any) => {
-        const { tokenId, seller, price, timestamp } = log.args;
+      logs.forEach((log) => {
+        const { tokenId, seller, price, timestamp } = log.args as {
+          tokenId: bigint;
+          seller: string;
+          price: bigint;
+          timestamp: bigint;
+        };
 
         const newEvent: MarketplaceEvent = {
           type: 'listed',
@@ -76,8 +81,14 @@ export function useMarketplaceEvents() {
     ],
     eventName: 'Sold',
     onLogs(logs) {
-      logs.forEach((log: any) => {
-        const { tokenId, seller, buyer, price, timestamp } = log.args;
+      logs.forEach((log) => {
+        const { tokenId, seller, buyer, price, timestamp } = log.args as {
+          tokenId: bigint;
+          seller: string;
+          buyer: string;
+          price: bigint;
+          timestamp: bigint;
+        };
 
         const newEvent: MarketplaceEvent = {
           type: 'sold',
@@ -113,8 +124,12 @@ export function useMarketplaceEvents() {
     ],
     eventName: 'ListingCancelled',
     onLogs(logs) {
-      logs.forEach((log: any) => {
-        const { tokenId, seller, timestamp } = log.args;
+      logs.forEach((log) => {
+        const { tokenId, seller, timestamp } = log.args as {
+          tokenId: bigint;
+          seller: string;
+          timestamp: bigint;
+        };
 
         const newEvent: MarketplaceEvent = {
           type: 'cancelled',

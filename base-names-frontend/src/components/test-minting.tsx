@@ -10,10 +10,33 @@ import { testMintingProcess, analyzeRevenueFlow } from '@/lib/test-minting';
 import { AlertTriangle, CheckCircle, XCircle, DollarSign, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface TestResult {
+  success: boolean;
+  error?: string;
+  available?: boolean;
+  required?: string;
+  userBalance?: string;
+  pricing?: {
+    basePrice: string;
+    premium: string;
+    total: string;
+    usdEstimate: string;
+  };
+  sufficientFunds?: boolean;
+  contractAddress?: string;
+  parameters?: unknown;
+}
+
+interface RevenueAnalysis {
+  contractAddress?: string;
+  balance?: string;
+  error?: string;
+}
+
 export function TestMinting() {
   const [testDomain, setTestDomain] = useState('');
-  const [testResults, setTestResults] = useState<any>(null);
-  const [revenueAnalysis, setRevenueAnalysis] = useState<any>(null);
+  const [testResults, setTestResults] = useState<TestResult | null>(null);
+  const [revenueAnalysis, setRevenueAnalysis] = useState<RevenueAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const { address } = useAccount();
 
@@ -32,16 +55,17 @@ export function TestMinting() {
         analyzeRevenueFlow()
       ]);
 
-      setTestResults(mintResult);
-      setRevenueAnalysis(revenueResult);
+      setTestResults(mintResult as TestResult);
+      setRevenueAnalysis(revenueResult as RevenueAnalysis);
 
       if (mintResult.success) {
         toast.success('Minting test completed successfully!');
       } else {
         toast.error(`Test failed: ${mintResult.error}`);
       }
-    } catch (error: any) {
-      toast.error(`Test error: ${error.message}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Test error: ${errorMessage}`);
       console.error('Minting test error:', error);
     } finally {
       setLoading(false);
@@ -121,28 +145,30 @@ export function TestMinting() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="font-semibold">Pricing Breakdown</h4>
-                  <div className="bg-muted p-4 rounded-lg space-y-2">
-                    <div className="flex justify-between">
-                      <span>Base Price:</span>
-                      <span className="font-mono">{testResults.pricing.basePrice} ETH</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Premium:</span>
-                      <span className="font-mono">{testResults.pricing.premium} ETH</span>
-                    </div>
-                    <hr />
-                    <div className="flex justify-between font-semibold">
-                      <span>Total Cost:</span>
-                      <span className="font-mono">{testResults.pricing.total} ETH</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>USD Estimate:</span>
-                      <span>${testResults.pricing.usdEstimate}</span>
+                {testResults.pricing && (
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Pricing Breakdown</h4>
+                    <div className="bg-muted p-4 rounded-lg space-y-2">
+                      <div className="flex justify-between">
+                        <span>Base Price:</span>
+                        <span className="font-mono">{testResults.pricing.basePrice} ETH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Premium:</span>
+                        <span className="font-mono">{testResults.pricing.premium} ETH</span>
+                      </div>
+                      <hr />
+                      <div className="flex justify-between font-semibold">
+                        <span>Total Cost:</span>
+                        <span className="font-mono">{testResults.pricing.total} ETH</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>USD Estimate:</span>
+                        <span>${testResults.pricing.usdEstimate}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="space-y-2">
                   <h4 className="font-semibold">Funds Check</h4>

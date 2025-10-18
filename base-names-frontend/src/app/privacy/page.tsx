@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Eye, Database, Lock } from 'lucide-react';
+import { Shield, Lock } from 'lucide-react';
 
 export default function PrivacyPage() {
   return (
@@ -158,7 +158,7 @@ export default function PrivacyPage() {
 
         <h2>11. Changes to This Policy</h2>
         <p>
-          We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on our Service and updating the "Last updated" date.
+          We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on our Service and updating the &quot;Last updated&quot; date.
         </p>
 
         <h2>12. Contact Us</h2>

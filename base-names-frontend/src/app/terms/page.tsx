@@ -31,7 +31,7 @@ export default function TermsPage() {
       <div className="prose prose-slate dark:prose-invert max-w-none">
         <h2>1. Acceptance of Terms</h2>
         <p>
-          By accessing or using the Base Names Service (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you may not access the Service.
+          By accessing or using the Base Names Service (the &quot;Service&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you disagree with any part of these terms, you may not access the Service.
         </p>
 
         <h2>2. Description of Service</h2>

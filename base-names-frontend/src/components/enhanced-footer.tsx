@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
 import {
   Github,
   Twitter,
@@ -82,7 +81,7 @@ export function EnhancedFooter() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success('Successfully subscribed to newsletter!');
       setEmail('');
-    } catch (error) {
+    } catch {
       toast.error('Failed to subscribe. Please try again.');
     } finally {
       setIsSubscribing(false);

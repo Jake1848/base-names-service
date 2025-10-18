@@ -178,7 +178,7 @@ export default function CookiesPage() {
 
         <h2>7. Updates to Cookie Policy</h2>
         <p>
-          We may update this Cookie Policy to reflect changes in our practices or applicable laws. We will notify you of significant changes and update the "Last updated" date.
+          We may update this Cookie Policy to reflect changes in our practices or applicable laws. We will notify you of significant changes and update the &quot;Last updated&quot; date.
         </p>
 
         <h2>8. Contact Information</h2>

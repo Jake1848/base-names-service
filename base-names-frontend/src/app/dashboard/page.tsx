@@ -21,7 +21,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-function ListDomainDialog({ domain }: { domain: any }) {
+interface Domain {
+  name: string;
+  tokenId: bigint;
+  expires: bigint;
+  daysUntilExpiry: number;
+  isExpiringSoon: boolean;
+}
+
+function ListDomainDialog({ domain }: { domain: Domain }) {
   const [price, setPrice] = useState('');
   const [isListingdialogopen, setIsListingDialogOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -53,7 +61,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
 
       toast.success('Domain listed on marketplace!');
       refetch(); // Refresh listing status
-    } catch (error) {
+    } catch {
       setIsApproving(false);
       setIsListing(false);
     }
@@ -65,7 +73,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
       await cancelListing(domain.tokenId);
       toast.success('Listing cancelled successfully!');
       refetch(); // Refresh listing status
-    } catch (error) {
+    } catch {
       // Error already handled in hook
     } finally {
       setIsCancelling(false);
@@ -119,7 +127,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
               className="mt-1"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Marketplace fee: 2.5% • You'll receive {price ? (parseFloat(price) * 0.975).toFixed(4) : '0'} ETH
+              Marketplace fee: 2.5% • You&apos;ll receive {price ? (parseFloat(price) * 0.975).toFixed(4) : '0'} ETH
             </p>
           </div>
           <div className="bg-muted p-3 rounded-lg space-y-1 text-sm">
@@ -140,7 +148,7 @@ function ListDomainDialog({ domain }: { domain: any }) {
 }
 
 export default function DashboardPage() {
-  const { address, isConnected, chainId } = useAccount();
+  const { isConnected, chainId } = useAccount();
   const { domains, loading } = useDomainOwnership();
 
   if (!isConnected) {
@@ -222,7 +230,7 @@ export default function DashboardPage() {
                 <AlertCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-xl font-semibold mb-2">No Domains Found</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  You don't own any .base domains yet. Register your first domain to get started!
+                  You don&apos;t own any .base domains yet. Register your first domain to get started!
                 </p>
                 <Link href="/">
                   <Button size="lg">
@@ -296,7 +304,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                We're building advanced domain management features including:
+                We&apos;re building advanced domain management features including:
               </p>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">

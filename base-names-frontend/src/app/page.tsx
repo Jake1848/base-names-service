@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatAddress, formatDate, getDaysUntilExpiry } from '@/lib/utils';
+import { RegistrationProgress } from '@/components/registration-progress';
 
 // Enhanced domain validation regex
 const DOMAIN_NAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
@@ -245,7 +246,7 @@ function EnhancedDomainSearch() {
   const [validationError, setValidationError] = useState<ValidationError | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [registrationStep, setRegistrationStep] = useState<'idle' | 'committing' | 'waiting' | 'registering'>('idle');
+  const [registrationStep, setRegistrationStep] = useState<'idle' | 'committing' | 'waiting' | 'registering' | 'complete'>('idle');
   const [commitmentSecret, setCommitmentSecret] = useState<`0x${string}` | null>(null);
   const [waitTimeRemaining, setWaitTimeRemaining] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -306,6 +307,33 @@ function EnhancedDomainSearch() {
     hash: txHash,
   });
 
+  // Countdown timer during waiting phase
+  useEffect(() => {
+    if (registrationStep === 'waiting' && waitTimeRemaining > 0) {
+      const interval = setInterval(() => {
+        setWaitTimeRemaining(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [registrationStep, waitTimeRemaining]);
+
+  // Auto-progress: When countdown finishes, automatically trigger registration
+  useEffect(() => {
+    if (registrationStep === 'waiting' && waitTimeRemaining === 0 && commitmentSecret) {
+      toast.info('Security wait complete! Auto-registering domain...');
+      // Automatically trigger registration after a brief delay
+      setTimeout(() => {
+        handleRegister();
+      }, 1000);
+    }
+  }, [registrationStep, waitTimeRemaining, commitmentSecret]);
+
   useEffect(() => {
     if (receipt) {
       console.log('');
@@ -343,18 +371,22 @@ function EnhancedDomainSearch() {
         }
         console.log('');
 
-        toast.success('Transaction confirmed!');
         if (registrationStep === 'registering') {
-          console.log('✅✅✅ DOMAIN SUCCESSFULLY REGISTERED! ✅✅✅');
-          console.log(`Domain: ${searchTerm}.base`);
-          console.log('Owner:', receipt.from);
-          toast.success(`Successfully registered ${searchTerm}.base!`);
-          setRegistrationStep('idle');
-          setCommitmentSecret(null);
-          setWaitTimeRemaining(0);
+          toast.success(`Successfully registered ${searchTerm}.base!`, {
+            duration: 5000,
+            description: 'Your domain is now ready to use!'
+          });
+          setRegistrationStep('complete');
+          // Reset after showing success
+          setTimeout(() => {
+            setRegistrationStep('idle');
+            setCommitmentSecret(null);
+            setWaitTimeRemaining(0);
+          }, 3000);
         } else if (registrationStep === 'committing') {
-          console.log('✅ COMMITMENT SAVED ON-CHAIN');
-          console.log('Wait 60 seconds before completing registration');
+          toast.success('Commitment confirmed! Starting security wait period...');
+          setRegistrationStep('waiting');
+          setWaitTimeRemaining(60);
         }
       } else {
         console.log('❌❌❌ TRANSACTION REVERTED! ❌❌❌');
@@ -552,22 +584,8 @@ function EnhancedDomainSearch() {
         console.log('⏳ Waiting for user to approve transaction in wallet...');
         console.log('═══════════════════════════════════════════════════════');
 
-        toast.success('Commitment made! Wait 60 seconds then click Register again.');
-        setRegistrationStep('waiting');
-        setWaitTimeRemaining(60);
-
-        // Start countdown
-        const interval = setInterval(() => {
-          setWaitTimeRemaining(prev => {
-            if (prev <= 1) {
-              clearInterval(interval);
-              setRegistrationStep('idle');
-              toast.success('Ready! Click Register to complete.');
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+        // Countdown is managed by the transaction confirmation useEffect
+        // No need to start countdown here anymore
       }
       // Step 2: Complete registration
       else if (commitmentSecret && waitTimeRemaining === 0) {
@@ -934,9 +952,15 @@ function EnhancedDomainSearch() {
               )}
             </AnimatePresence>
 
+            {/* Registration Progress */}
+            <RegistrationProgress
+              step={registrationStep}
+              waitTimeRemaining={waitTimeRemaining}
+            />
+
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <motion.div 
+              <motion.div
                 className="flex-1"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -974,23 +998,23 @@ function EnhancedDomainSearch() {
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.3 }}
                     className="flex-1"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: registrationStep === 'idle' ? 1.02 : 1 }}
+                    whileTap={{ scale: registrationStep === 'idle' ? 0.98 : 1 }}
                   >
                     <Button
                       onClick={handleRegister}
-                      disabled={isRegistering || !price}
+                      disabled={isRegistering || !price || registrationStep !== 'idle'}
                       size="lg"
-                      className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
+                      className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isRegistering ? (
+                      {registrationStep !== 'idle' ? (
                         <motion.span
                           animate={{ rotate: 360 }}
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           className="flex items-center gap-2"
                         >
                           <Loader2 className="h-4 w-4" />
-                          Registering...
+                          Processing...
                         </motion.span>
                       ) : (
                         <motion.span
